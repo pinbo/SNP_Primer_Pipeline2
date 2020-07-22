@@ -660,17 +660,17 @@ def kasp(seqfile):
 					pr.difthreeall = "YES"
 				if varsite < snp_site:
 					pc = pl # pc is the common primer
-					print "pc = pl"
+					# print "pc = pl"
 					# rr: range to check; only check 10 bases from 3' end
 					rr = range(max(pc.end - 10,gap_left), pc.end) # pc.end is 1 based, so change to 0 based.
 				else:
 					pc = pr
-					print "pc = pr"
+					# print "pc = pr"
 					rr = range(pc.end -1, min(pc.end + 9, len(seq_template) - 20)) # rr should be within the keys of diffarray, which is from gap_left to gap_right
-				print "gap_left ", gap_left
-				print "len(seq_template) ", len(seq_template)
-				print "pc.end ", pc.end
-				print "rr ", rr
+				# print "gap_left ", gap_left
+				# print "len(seq_template) ", len(seq_template)
+				# print "pc.end ", pc.end
+				# print "rr ", rr
 				# sum of all the variation in each site
 				aa = [sum(x) for x in zip(*(diffarray[k] for k in rr))]
 				print "aa ", aa
