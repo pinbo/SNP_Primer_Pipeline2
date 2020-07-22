@@ -35,10 +35,10 @@ from glob import glob
 import copy
 #########################
 
-blast = int(sys.argv[1]) # 0 or 1, whether to blast
-max_Tm = sys.argv[2] # max Tm, default 63, can be increased in case high GC region
-max_size = sys.argv[3] # max primer size, default 25, can be increased in case low GC region
-pick_anyway = sys.argv[4] # pick primer anyway even if it violates specific constrains
+#blast = int(sys.argv[1]) # 0 or 1, whether to blast
+max_Tm = sys.argv[1] # max Tm, default 63, can be increased in case high GC region
+max_size = sys.argv[2] # max primer size, default 25, can be increased in case low GC region
+pick_anyway = sys.argv[3] # pick primer anyway even if it violates specific constrains
 
 # get all the raw sequences
 raw = glob("flanking_temp_marker*") # All file names start from "flanking"
@@ -213,39 +213,6 @@ def get_homeo_seq(fasta, target, ids, align_left, align_right):
 # function to count mismtaches
 def mismatchn (s1, s2):
 	return sum(c1!=c2 for c1,c2 in zip(s1,s2))
-
-# function to blast and parse the output of each primer in the wheat genome
-# depends on function: mismtachn
-def primer_blast(primer_for_blast, outfile_blast):
-	forblast = open("for_blast_primer.fa", 'w') # for blast against the gnome
-	for k, v in primer_for_blast.items(): # k is primer sequence and v is the number
-		forblast.write(">" + v + "\n" + k + "\n")
-	forblast.close()
-	blast_hit = {} # matched chromosomes for primers: less than 2 mismatches in the first 4 bps from 3'
-	### for blast
-	reference = "/Library/WebServer/Documents/blast/db/nucleotide/161010_Chinese_Spring_v1.0_pseudomolecules.fasta"
-	cmd2 = 'blastn -task blastn -db ' + reference + ' -query for_blast_primer.fa -outfmt "6 std qseq sseq qlen slen" -num_threads 3 -word_size 7 -out ' + outfile_blast
-	print "Step 2: Blast command:\n", cmd2
-	call(cmd2, shell=True)
-	# process blast file
-	# blast fields
-	# IWB50236_7A_R	IWGSC_CSS_7DS_scaff_3919748	98.718	78	1	0	24	101	4891	4968	1.55e-30	138	CTCATCAAATGATTCAAAAATATCGATRCTTGGCTGGTGTATCGTGCAGACGACAGTTCGTCCGGTATCAACAGCATT	CTCATCAAATGATTCAAAAATATCGATGCTTGGCTGGTGTATCGTGCAGACGACAGTTCGTCCGGTATCAACAGCATT	101 5924
-	# Fields: 
-	# 1: query id, subject id, % identity, alignment length, mismatches, gap opens, 
-	# 7: q. start, q. end, s. start, s. end, evalue, bit score
-	# 13: q. sequence, s. sequence, q. length s. length
-	for line in open(outfile_blast):
-		if line.startswith('#'):
-			continue
-		fields = line.split("\t")
-		query, subject, pct_identity, align_length= fields[:4]
-		qstart, qstop, sstart, sstop = [int(x) for x in fields[6:10]]
-		qseq, sseq = fields[12:14]
-		qlen = int(fields[14])
-		n1 = qlen - qstop
-		if n1 < 2 and mismatchn(qseq[(n1 - 4):], sseq[(n1 - 4):]) + n1 < 2: # if less than 2 mismtaches in the first 4 bases from the 3' end of the primer
-			blast_hit[query] = blast_hit.setdefault(query, "") + ";" + subject + ":" + str(sstart)
-	return blast_hit
 
 # function to extract sequences from a fasta file 
 def get_fasta(infile):
@@ -494,7 +461,7 @@ def kasp(seqfile):
 		call(p3cmd, shell=True)
 		primerpairs = parse_primer3output(primer3output, 5)
 		# Get primer list for blast
-		primer_for_blast = {}
+		#primer_for_blast = {}
 		final_primers = {}
 		nL = 0 # left primer count
 		nR = 0 # right primer count
@@ -502,18 +469,18 @@ def kasp(seqfile):
 			if pp.product_size != 0:
 				pl = pp.left
 				pr = pp.right
-				if pl.seq not in primer_for_blast:
-					nL += 1
-					pl.name = "L" + str(nL)
-					primer_for_blast[pl.seq] = pl.name # use seq as keys
-				else:
-					pl.name = primer_for_blast[pl.seq]
-				if pr.seq not in primer_for_blast:
-					nR += 1
-					pr.name = "R" + str(nR)
-					primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
-				else:
-					pr.name = primer_for_blast[pr.seq]
+				# if pl.seq not in primer_for_blast:
+				# 	nL += 1
+				# 	pl.name = "L" + str(nL)
+				# 	primer_for_blast[pl.seq] = pl.name # use seq as keys
+				# else:
+				# 	pl.name = primer_for_blast[pl.seq]
+				# if pr.seq not in primer_for_blast:
+				# 	nR += 1
+				# 	pr.name = "R" + str(nR)
+				# 	primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
+				# else:
+				# 	pr.name = primer_for_blast[pr.seq]
 				pp.left = pl
 				pp.right = pr
 				final_primers[i] = pp
@@ -644,7 +611,7 @@ def kasp(seqfile):
 		print "primerpairs length ", len(primerpairs)
 		####################################
 		# Get primer list for blast
-		primer_for_blast = {}
+		#primer_for_blast = {}
 		final_primers = {} # final primers for output
 		nL = 0 # left primer count
 		nR = 0 # right primer count
@@ -673,32 +640,32 @@ def kasp(seqfile):
 				# print "rr ", rr
 				# sum of all the variation in each site
 				aa = [sum(x) for x in zip(*(diffarray[k] for k in rr))]
-				print "aa ", aa
+				#print "aa ", aa
 				if min(aa) > 0: # if common primer can differ all
-					if pl.seq not in primer_for_blast:
-						nL += 1
-						pl.name = "L" + str(nL)
-						primer_for_blast[pl.seq] = pl.name # use seq as keys
-					else:
-						pl.name = primer_for_blast[pl.seq]
-					if pr.seq not in primer_for_blast:
-						nR += 1
-						pr.name = "R" + str(nR)
-						primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
-					else:
-						pr.name = primer_for_blast[pr.seq]
+					# if pl.seq not in primer_for_blast:
+					# 	nL += 1
+					# 	pl.name = "L" + str(nL)
+					# 	primer_for_blast[pl.seq] = pl.name # use seq as keys
+					# else:
+					# 	pl.name = primer_for_blast[pl.seq]
+					# if pr.seq not in primer_for_blast:
+					# 	nR += 1
+					# 	pr.name = "R" + str(nR)
+					# 	primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
+					# else:
+					# 	pr.name = primer_for_blast[pr.seq]
 					pp.left = pl
 					pp.right = pr
 					final_primers[i] = pp
 	#################################################	
 	# write to file
 	outfile = open(out, 'w')
-	outfile.write("index\tproduct_size\ttype\tstart\tend\tvariation number\t3'diffall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\tPrimerID\tmatched_chromosomes\n")			
+	outfile.write("index\tproduct_size\ttype\tstart\tend\tvariation number\t3'diffall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\n")			
 	# blast primers
-	blast_hit = {}
-	outfile_blast = directory + "/primer_blast_out_" + snpname + ".txt"
-	if blast and len(primer_for_blast) > 0:
-		blast_hit = primer_blast(primer_for_blast, outfile_blast) # chromosome hit for each primer
+	# blast_hit = {}
+	# outfile_blast = directory + "/primer_blast_out_" + snpname + ".txt"
+	# if blast and len(primer_for_blast) > 0:
+	# 	blast_hit = primer_blast(primer_for_blast, outfile_blast) # chromosome hit for each primer
 	# write output file
 	for i, pp in final_primers.items():
 		pl = format_primer_seq(pp.left, variation)
@@ -721,9 +688,9 @@ def kasp(seqfile):
 			pA.seq = pA.seq[:-1] + ReverseComplement(SNP_A)
 			pB.seq = pB.seq[:-1] + ReverseComplement(SNP_B)
 			pC = pl
-		outfile.write("\t".join([i + "-" + SNP_A, str(pp.product_size), pA.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pA.name, blast_hit.setdefault(pA.name, "")]) + "\n")
-		outfile.write("\t".join([i + "-" + SNP_B, str(pp.product_size), pB.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pB.name, blast_hit.setdefault(pB.name, "")]) + "\n")
-		outfile.write("\t".join([i + "-Common", str(pp.product_size),   pC.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pC.name, blast_hit.setdefault(pC.name, "")]) + "\n")
+		outfile.write("\t".join([i + "-Allele-" + SNP_A, str(pp.product_size), pA.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pA.name]) + "\n")
+		outfile.write("\t".join([i + "-Allele-" + SNP_B, str(pp.product_size), pB.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pB.name]) + "\n")
+		outfile.write("\t".join([i + "-Common", str(pp.product_size),   pC.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pC.name]) + "\n")
 
 	outfile.write("\n\nSites that can differ all for " + snpname + "\n")
 	outfile.write(", ".join([str(x + 1) for x in variation])) # change to 1 based
