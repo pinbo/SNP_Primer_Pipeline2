@@ -34,11 +34,11 @@ import getopt, sys, os, re
 from glob import glob
 #########################
 
-blast = int(sys.argv[1]) # 0 or 1, whether to blast
-max_price = int(sys.argv[2])
-max_Tm = sys.argv[3] # max Tm, default 63, can be increased in case high GC region
-max_size = sys.argv[4] # max primer size, default 25, can be increased in case low GC region
-pick_anyway = sys.argv[5] # pick primer anyway even if it violates specific constrains
+#blast = int(sys.argv[1]) # 0 or 1, whether to blast
+max_price = int(sys.argv[1])
+max_Tm = sys.argv[2] # max Tm, default 63, can be increased in case high GC region
+max_size = sys.argv[3] # max primer size, default 25, can be increased in case low GC region
+pick_anyway = sys.argv[4] # pick primer anyway even if it violates specific constrains
 
 common_settings = "PRIMER_TASK=generic" + "\n" + \
 				"PRIMER_MAX_SIZE=" + max_size + "\n" + \
@@ -346,39 +346,6 @@ def test_enzyme(enzyme, wild_seq, mut_seq): # enzyme is an Restriction_Enzyme ob
 def mismatchn (s1, s2):
 	return sum(c1!=c2 for c1,c2 in zip(s1,s2))
 
-# function to blast and parse the output of each primer in the wheat genome
-# depends on function: mismtachn
-def primer_blast(primer_for_blast, outfile_blast):
-	forblast = open("for_blast_primer.fa", 'w') # for blast against the gnome
-	for k, v in primer_for_blast.items(): # k is the sequence and v is the number
-		forblast.write(">" + v + "\n" + k + "\n")
-	forblast.close()
-	blast_hit = {} # matched chromosomes for primers: less than 2 mismatches in the first 4 bps from 3'
-	### for blast
-	reference = "/Library/WebServer/Documents/blast/db/nucleotide/161010_Chinese_Spring_v1.0_pseudomolecules.fasta"
-	cmd2 = 'blastn -task blastn -db ' + reference + ' -query for_blast_primer.fa -outfmt "6 std qseq sseq qlen slen" -num_threads 3 -word_size 7 -out ' + outfile_blast
-	print "Step 2: Blast command:\n", cmd2
-	call(cmd2, shell=True)
-	# process blast file
-	# blast fields
-	# IWB50236_7A_R	IWGSC_CSS_7DS_scaff_3919748	98.718	78	1	0	24	101	4891	4968	1.55e-30	138	CTCATCAAATGATTCAAAAATATCGATRCTTGGCTGGTGTATCGTGCAGACGACAGTTCGTCCGGTATCAACAGCATT	CTCATCAAATGATTCAAAAATATCGATGCTTGGCTGGTGTATCGTGCAGACGACAGTTCGTCCGGTATCAACAGCATT	101 5924
-	# Fields: 
-	# 1: query id, subject id, % identity, alignment length, mismatches, gap opens, 
-	# 7: q. start, q. end, s. start, s. end, evalue, bit score
-	# 13: q. sequence, s. sequence, q. length s. length
-	for line in open(outfile_blast):
-		if line.startswith('#'):
-			continue
-		fields = line.split("\t")
-		query, subject, pct_identity, align_length= fields[:4]
-		qstart, qstop, sstart, sstop = [int(x) for x in fields[6:10]]
-		qseq, sseq = fields[12:14]
-		qlen = int(fields[14])
-		n1 = qlen - qstop
-		if n1 < 2 and mismatchn(qseq[(n1 - 4):], sseq[(n1 - 4):]) + n1 < 2: # if less than 2 mismtaches in the first 4 bases from the 3' end of the primer
-			blast_hit[query] = blast_hit.setdefault(query, "") + ";" + subject + ":" + str(sstart)
-	return blast_hit
-
 # function to extract sequences from a fasta file 
 def get_fasta(infile):
 	fasta = {} # dictionary for alignment
@@ -542,8 +509,9 @@ def format_primer_seq(primer, variation): # input is a primer object and variati
 
 def caps(seqfile):
 	#flanking_temp_marker_IWB1855_7A_R_251.fa
-	snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
-	chrom = chrom[0:2] # no arm
+	#snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
+	snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
+	#chrom = chrom[0:2] # no arm
 	snp_pos = int(pos) - 1 # 0-based
 	print "snpname, chrom, allele, pos ", snpname, chrom, allele, pos
 	getcaps_path = os.path.dirname(os.path.realpath(__file__))
@@ -836,9 +804,9 @@ def caps(seqfile):
 	#######################################
 	# write to file
 	outfile = open(out, 'w')
-	outfile.write("index\tproduct_size\ttype\tstart\tend\tdiff_number\t3'differall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\tPrimerID\tmatched_chromosomes\n")
+	outfile.write("index\tproduct_size\ttype\tstart\tend\tdiff_number\t3'differall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\n")
 	# Get primer list for blast
-	primer_for_blast = {}
+	# primer_for_blast = {}
 	final_primers = {}
 	nL = 0 # left primer count
 	nR = 0 # right primer count
@@ -846,27 +814,27 @@ def caps(seqfile):
 		if pp.product_size != 0:
 			pl = pp.left
 			pr = pp.right
-			if pl.seq not in primer_for_blast:
-				nL += 1
-				pl.name = "L" + str(nL)
-				primer_for_blast[pl.seq] = pl.name # use seq as keys
-			else:
-				pl.name = primer_for_blast[pl.seq]
-			if pr.seq not in primer_for_blast:
-				nR += 1
-				pr.name = "R" + str(nR)
-				primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
-			else:
-				pr.name = primer_for_blast[pr.seq]
+			# if pl.seq not in primer_for_blast:
+			# 	nL += 1
+			# 	pl.name = "L" + str(nL)
+			# 	primer_for_blast[pl.seq] = pl.name # use seq as keys
+			# else:
+			# 	pl.name = primer_for_blast[pl.seq]
+			# if pr.seq not in primer_for_blast:
+			# 	nR += 1
+			# 	pr.name = "R" + str(nR)
+			# 	primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
+			# else:
+			# 	pr.name = primer_for_blast[pr.seq]
 			pp.left = pl
 			pp.right = pr
 			final_primers[i] = pp
 				
 	# blast primers
-	blast_hit = {}
+	# blast_hit = {}
 	outfile_blast = directory + "/primer_blast_out_" + snpname + ".txt"
-	if blast and len(primer_for_blast) > 0:
-		blast_hit = primer_blast(primer_for_blast, outfile_blast) # chromosome hit for each primer
+	# if blast and len(primer_for_blast) > 0:
+	# 	blast_hit = primer_blast(primer_for_blast, outfile_blast) # chromosome hit for each primer
 	# write output file
 	for i, pp in final_primers.items():
 		#varsite = int(i.split("-")[-1]) # variation site
@@ -878,8 +846,8 @@ def caps(seqfile):
 		#if varsite in variation:
 		pl.difthreeall = "YES"
 		pr.difthreeall = "YES"
-		outfile.write("\t".join([i, str(pp.product_size), "LEFT", pl.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pl.name, blast_hit.setdefault(pl.name, "")]) + "\n")
-		outfile.write("\t".join([i, str(pp.product_size), "RIGHT", pr.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pr.name, blast_hit.setdefault(pr.name, "")]) + "\n")
+		outfile.write("\t".join([i, str(pp.product_size), "LEFT", pl.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end]) + "\n")
+		outfile.write("\t".join([i, str(pp.product_size), "RIGHT", pr.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end]) + "\n")
 	
 	outfile.write("\n\nSites that can differ all for " + snpname + "\n")
 	outfile.write(", ".join([str(x + 1) for x in variation])) # change to 1 based
