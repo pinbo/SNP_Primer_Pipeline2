@@ -410,8 +410,10 @@ def format_primer_seq(primer, variation): # input is a primer object and variati
 
 def kasp(seqfile):
 	#flanking_temp_marker_IWB1855_7A_R_251.fa
-	snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
-	chrom = chrom[0:2] # no arm
+	#snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
+	snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
+	print "Pos ", pos
+	#chrom = chrom[0:2] # no arm
 	snp_site = int(pos) - 1 # 0-based
 	getkasp_path = os.path.dirname(os.path.realpath(__file__))
 	global_setting_file = getkasp_path + "/global_settings.txt"
@@ -430,6 +432,8 @@ def kasp(seqfile):
 	
 	# get target and ids and rename fasta seq names
 	fasta_raw, target, ids = get_fasta2(seqfile, chrom)
+	print "target ", target
+	print "others ", ids
 	# write the renamed fasta seq to a file
 	seqfile2 = "renamed_" + seqfile
 	out_temp = open(seqfile2, "w")
@@ -656,11 +660,17 @@ def kasp(seqfile):
 					pr.difthreeall = "YES"
 				if varsite < snp_site:
 					pc = pl # pc is the common primer
+					print "pc = pl"
 					# rr: range to check; only check 10 bases from 3' end
 					rr = range(max(pc.end - 10,gap_left), pc.end) # pc.end is 1 based, so change to 0 based.
 				else:
 					pc = pr
+					print "pc = pr"
 					rr = range(pc.end -1, min(pc.end + 9, len(seq_template) - 20)) # rr should be within the keys of diffarray, which is from gap_left to gap_right
+				print "gap_left ", gap_left
+				print "len(seq_template) ", len(seq_template)
+				print "pc.end ", pc.end
+				print "rr ", rr
 				# sum of all the variation in each site
 				aa = [sum(x) for x in zip(*(diffarray[k] for k in rr))]
 				print "aa ", aa

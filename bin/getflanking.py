@@ -23,7 +23,7 @@
 #
 
 # example
-# ./getflanking.py for_polymarker.csv blast_out.tsv temp_range.txt 3
+# ./getflanking.py for_polymarker.csv blast_out.tsv temp_range.txt
 
 ### Imported
 import sys
@@ -33,17 +33,20 @@ import sys
 polymarker_input = sys.argv[1]
 blast_file = sys.argv[2] # this is a special blast file with two columns in the last: qseq and sseq (query sequence and subject sequenc)
 outfile = sys.argv[3]
-genome_number =  int(sys.argv[4])
-if genome_number not in [1, 2, 3]:
-	sys.exit("Genome number need to be either 1, 2, or 3")
+# genome_number =  int(sys.argv[4])
+# if genome_number not in [1, 2, 3]:
+# 	sys.exit("Genome number need to be either 1, 2, or 3")
 
-genomes = "ABD"
-genomes = genomes[:genome_number] + "n" # final genomes + chrUn
+# genomes = "ABD"
+# genomes = genomes[:genome_number] + "n" # final genomes + chrUn
 
 # get snp position
 snp_pos = {}
 for line in open(polymarker_input):
-	snp, chrom, seq = line.strip().replace(" ","").split(",") # in case there are spaces
+	line = line.strip()
+	if not line:
+		continue
+	snp, chrom, seq = line.replace(" ","").split(",") # in case there are spaces
 	snp = snp.replace("_", "-") # in case there is already "_" in the snp name
 	seq = seq.strip() # in case there are spaces in the input file
 	snp_pos[snp] = seq.find("[") + 1
@@ -79,12 +82,12 @@ for line in open(blast_file):
 	fields = line.split("\t")
 	query, subject = fields[:2]
 	snp, qchrom = query.split("_")[0:2] # snp name, query chromosome name
-	qchrom = qchrom[0:2] # no arm for pseudomolecule blast
+	#qchrom = qchrom[0:2] # no arm for pseudomolecule blast
 	#schrom = subject.split("_")[2] # subject chromosome name with arm
-	schrom = subject[-2:] # chr6A as in the pseudomolecule. No chromosome arm
+	schrom = subject #[-2:] # chr6A as in the pseudomolecule. No chromosome arm
 	#print qchrom, schrom
-	if schrom[1] not in genomes:
-		continue
+	# if schrom[1] not in genomes:
+	# 	continue
 	#pct_identity = float(fields[2]) # big gaps cause low identity
 	pct_identity = 100 - (float(fields[4]) + float(fields[5])) / float(fields[3]) * 100 # to avoid big gaps
 	align_length = int(fields[3])
@@ -128,14 +131,15 @@ for line in open(blast_file):
 		if sstart > sstop: # if minus strand
 			pos2 = down - pos + 1 # snp position in the extracted flanking sequences
 	
-		if qchrom == schrom:
-			snpinfo[query] = query + "_" + str(pos2)
+		#if qchrom == schrom:
+		snpinfo[query] = query + "_" + str(pos2)
 		#flanking[query + "-" + subject] = "\t".join([subject, str(up) + "-" + str(down), strand])
 		#flanking[query + "-" + subject + "-" + str(sstart)] = "\t".join([subject, str(up) + "-" + str(down), strand])
 		snp_list.append(query)
 		range_list.append("\t".join([subject, str(up) + "-" + str(down), strand]))
 
 # find out which has too many hits
+print snpinfo
 max_hit = 6
 from collections import Counter
 ct = Counter(snp_list) # count of each snp hits

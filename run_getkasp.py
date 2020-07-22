@@ -60,16 +60,18 @@ def main(args):
 	call(cmd2, shell=True)
 	
 	# Step 3: parse the blast output file and output the homelog contigs and flanking ranges
-	cmd3 = script_path + "getflanking.py " + polymarker_input + " blast_out.txt temp_range.txt " + genome_number
+	cmd3 = script_path + "getflanking.py " + polymarker_input + " blast_out.txt temp_range.txt "
 	print "Step 3: Get the flanking range command:\n", cmd3
 	call(cmd3, shell=True)
 	
 	# step 4: split file for each marker
+	# gawk '{ print $2,$3,$4 > "temp_marker_"$1".txt" }' temp_range.txt
 	cmd4 = "gawk  '{ print $2,$3,$4 > \"temp_marker_\"$1\".txt\" }' temp_range.txt"
 	print "Step 4: Flanking range for each marker command:\n", cmd4
 	call(cmd4, shell=True)
 	
 	# step 5: get flanking sequences for each file
+	# find . -iname "temp_marker*" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db  reference  > flanking_{}.fa'
 	cmd5 = "find . -iname \"temp_marker*\" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db " + reference + " > flanking_{}.fa'"
 	print "Step 5: Get flanking sequences for each marker command:\n", cmd5
 	call(cmd5, shell=True)
