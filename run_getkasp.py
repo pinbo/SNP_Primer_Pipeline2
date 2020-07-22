@@ -27,25 +27,24 @@
 
 # change the reference location accordingly.
 
-# example: run_getkasp.py for_polymarker.csv 3 200 1 1 1 65
+# example: run_getkasp.py for_polymarker.csv 200 1 1 63 25 0 ~/blast/db/161010_Chinese_Spring_v1.0_pseudomolecules.fasta
 
 #########################
 from glob import glob
 
 
 def main(args):
-	polymarker_input = args[1]
-	price = args[2]
-	caps = int(args[3])
-	kasp = int(args[4])
-	max_Tm = args[5]
-	max_size = args[6]
+	polymarker_input = args[1] # SNP input file, same as polymarker input
+	price = args[2] # maximum restriction enzyme, e.g. 200 ($200/1000U)
+	caps = int(args[3]) # whether to design CAPS primer, 1 is yes, 0 is no
+	kasp = int(args[4]) # whether to design KASP primer, 1 is yes, 0 is no
+	max_Tm = args[5] # max primer Tm, e.g. 63
+	max_size = args[6] # max primer size, e.g. 25
 	pick_anyway = args[7] # pick primer anyway even if it violates specific constrains
-	reference = args[8]
+	reference = args[8] # a blastable reference sequence file
 	
 	script_path = os.path.dirname(os.path.realpath(__file__)) + "/bin/" # scripts folder
-	#reference = "/Library/WebServer/Documents/blast/db/nucleotide/IWGSC_CSS_ABD-TGAC_v1.fa" # blast contig file
-	#reference = "/Library/WebServer/Documents/blast/db/nucleotide/161010_Chinese_Spring_v1.0_pseudomolecules.fasta"
+
 	
 	# step 1:
 	cmd1 = script_path + "parse_polymarker_input.py " + polymarker_input
@@ -79,24 +78,14 @@ def main(args):
 		cmd6 = script_path + "getkasp3.py " + max_Tm + " " + max_size + " " + pick_anyway # add blast option
 		print "Step 6: Get KASP primers for each marker command:\n", cmd6
 		call(cmd6, shell=True)
-	
-	# step 7: parse the for_polymarker input and create the input for SNP2CAPS
-	#cmd7 = script_path + "parse_polymarker_input_for_CAPS.py " + polymarker_input
-	#print "Step 7: Create input file for SNP2CAPS:\n", cmd7
-	#call(cmd7, shell=True)
-	
-	# step 8: run SNP2CAPS script to find all potential Restriciton enzymes
-	#cmd8 = script_path + "SNP2CAPS.pl for_SNP2CAPS.fa " + script_path + "REgcg.txt EcoRV,BamHI > CAPS_output.txt"
-	#print "Step 8: run SNP2CAPS script to find all potential Restriciton enzymes:\n", cmd8
-	#call(cmd8, shell=True)
-	
-	# step 9: get CAPS markers
+
+	# step 7: get CAPS markers
 	if caps:
 		cmd9 = script_path + "getCAPS.py " + price + " " + max_Tm + " " + max_size + " " + pick_anyway # add blast option and price
 		print "Step 9: Get CAPS and dCAPS primers for each marker command:\n", cmd9
 		call(cmd9, shell=True)
 	
-	# step 10: concatenate output files
+	# step 8: concatenate output files
 	caps_files = glob("CAPS_output/selected_CAPS_primers*")
 	kasp_files = glob("KASP_output/selected_KASP_primers*")
 	print "all output files are: ", caps_files
