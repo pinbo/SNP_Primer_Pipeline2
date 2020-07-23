@@ -1,10 +1,10 @@
 # SNP Primer Design Pipeline 2
-These scripts make a simple pipeline to design **KASP** (Kompetitive Allele Specific PCR) and **CAPS/dCAPS** primers for SNP genotyping. Compared to **SNP Primer Design Pipeline** (1), this version should be able to design primers for KASP/CAPS primers for any species, not just polyploid wheat.
+These scripts make a simple pipeline to design **KASP** (Kompetitive Allele Specific PCR) and **CAPS/dCAPS** primers for SNP genotyping. Compared to **SNP Primer Design Pipeline** (1), this version should be able to design primers for KASP/CAPS primers for **ANY species**, not just polyploid wheat.
 
 
 # Usage
 
-I divided the pipeline into 8 steps:
+I divided the pipeline into 7 steps:
 - Script "parse_polymarker_input.py": parse the polymarker input and prepare a fasta file for blast
 - Blast using system command "blastn"
 - Script "getflanking.py": Parse the blast output file and output the homelog contigs and flanking ranges
@@ -14,11 +14,11 @@ I divided the pipeline into 8 steps:
 - Get CAPS primers using script "getCAPS.py"
 
 
-You can run this step by step or run the whole pipeline with script "run_getkasp.py". I suggest run the 6 steps in the script "run_getkasp.py" step by step to get familiar how it works first.
+You can run this step by step or run the whole pipeline with script "run_getkasp.py". I suggest run the 7 steps in the script "run_getkasp.py" step by step to get familiar how it works first.
 
 Example: `run_getkasp.py for_polymarker.csv 200 1 1 63 25 0 /home/junli/blastdb/iwgsc_refseqv1.0.fasta`
 
-**Inputs are**: SNP files with the polymarker format (each line is a SNP with 3 comma separated fields: SNP name, chromosome/contig where it is located, flanking sequences), enzyme maximum price (per 1000 U), whether to design CAPS (1 for yes and 0 for NO), whether to design KASP (1 for yes and 0 for NO),  maximum Tm (63 C for example), maximum primer size (25 bp for example), whether to pick primer anyway even if it violates specific constrains (1 for yes and 0 for NO), reference file path.
+**Inputs are**: 1) SNP files with the polymarker format (each line is a SNP with 3 comma separated fields: SNP name, chromosome/contig where it is located, flanking sequences), 2) enzyme maximum price (per 1000 U), 3) whether to design CAPS (1 for yes and 0 for NO), 4) whether to design KASP (1 for yes and 0 for NO),  5) maximum Tm (63 C for example), 6) maximum primer size (25 bp for example), 7) whether to pick primer anyway even if it violates specific constrains (1 for yes and 0 for NO), 8) reference file path.
 
 The "bin" folder has all the scripts for each step and software **primer3** and **muscle** in case your system does not have them.
 
@@ -26,7 +26,7 @@ The "bin" folder has all the scripts for each step and software **primer3** and 
 
 This software uses the same format as polymarker (http://www.polymarker.info/about), i.e. a csv file with each line looks like this:
 
-IWA7892,1BL,AGGATTCACGGGAAAAGATTTCGTCGCA**[C/T]**GTGCTAGGGTCTTTGCAGAATGTTA
+IWA7892,chr1B,AGGATTCACGGGAAAAGATTTCGTCGCA**[C/T]**GTGCTAGGGTCTTTGCAGAATGTTA
 
 NO space is allowed. It includes Gene ID, chromosome/contig where it is located, flanking sequence (50 to 100 bp) with the alleles in the middle.
 
