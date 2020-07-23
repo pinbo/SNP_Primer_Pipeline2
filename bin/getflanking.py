@@ -68,13 +68,16 @@ range_list = [] # range list for each subject
 # 7: q. start, q. end, s. start, s. end, evalue, bit score
 # 13: q. sequence, s. sequence, s. length
 snp_size_list = [] # max alignment length for each snp
+top_hit = {} # get top hit for each query, in case the query chromosome name did not show up in subjects
 for line in open(blast_file):
 	if line.startswith('#'):
 		continue
 	fields = line.split("\t")
 	query, subject = fields[:2]
-	snp, qchrom = query.split("_")[0:2] # snp name, query chromosome name
+	snp, qchrom, allele = query.split("_") # snp name, query chromosome name
 	schrom = subject
+	if query not in top_hit:
+		top_hit[query] = '_'.join([snp,subject,allele]) # the best hit for each query
 	pct_identity = 100 - (float(fields[4]) + float(fields[5])) / float(fields[3]) * 100 # to avoid big gaps
 	align_length = int(fields[3])
 	if snp not in snp_size_list:
@@ -122,7 +125,9 @@ for line in open(blast_file):
 		range_list.append("\t".join([subject, str(up) + "-" + str(down), strand]))
 
 # find out which has too many hits
-# print snpinfo
+print("snpinfo", snpinfo)
+print("snp_list", snp_list)
+print("top_hit", top_hit)
 max_hit = 6
 from collections import Counter
 ct = Counter(snp_list) # count of each snp hits
@@ -138,6 +143,10 @@ for i in range(len(snp_list)):
 		#print snp, ct[snp]
 		continue
 	rg = range_list[i]
-	out.write(snpinfo[snp] + "\t" + rg + "\n")
-	
+	if snp not in snpinfo: # snp has no hit on the target chromosome
+		print("Warning: no hits were found on target chromosome for SNP ", snp, "!! Use the first hit as target chromosome!!")
+		out.write(top_hit[snp] + "\t" + rg + "\n")
+	else:
+		out.write(snpinfo[snp] + "\t" + rg + "\n")
+
 out.close()
