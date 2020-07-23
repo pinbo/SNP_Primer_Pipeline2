@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  getcaps
@@ -59,14 +59,14 @@ try:
 	opts, args = getopt.getopt(sys.argv[1:], "a:b:p:h", ["help"])
 except getopt.GetoptError as err:
 	# print help information and exit:
-	print str(err)  # will print something like "option -a not recognized"
-	print usage
+	print(str(err))  # will print something like "option -a not recognized"
+	print(usage)
 	sys.exit(2)
 for o, a in opts:
 	if o == "-a":
 		seqA = a
 	elif o in ("-h", "--help"):
-		print usage
+		print(usage)
 		sys.exit()
 	elif o in ("-p"):
 		max_price = int(a)
@@ -74,10 +74,10 @@ for o, a in opts:
 		seqB = a
 	else:
 		assert False, "unhandled option"
-print "Options done"
+print("Options done")
 
 if not seqA or not seqB:
-	print usage
+	print(usage)
 	sys.exit(1)
 
 
@@ -133,21 +133,21 @@ def ReverseComplement(seq):
 	return "".join([seq_dict[base] for base in reversed(seq)])
 
 def string_dif(s1, s2): # two strings with equal length
-	return [i for i in xrange(len(s1)) if s1[i] != s2[i]]
+	return [i for i in range(len(s1)) if s1[i] != s2[i]]
 
 def dif_region(s1, s2): # two strings do not need to have the same length
 	s1r = s1[::-1] # reverse the string
 	s2r = s2[::-1] # reverse the string
-	L1 = [i for i in xrange(min([len(s1),len(s2)])) if s1[i] != s2[i]] # forward
-	L2 = [i for i in xrange(min([len(s1),len(s2)])) if s1r[i] != s2r[i]] # reverse
+	L1 = [i for i in range(min([len(s1),len(s2)])) if s1[i] != s2[i]] # forward
+	L2 = [i for i in range(min([len(s1),len(s2)])) if s1r[i] != s2r[i]] # reverse
 	return [L1[0], len(s1) - L2[0] - 1] # differ positions for when counting forward and reversely on the template (the two numbers are both in forward direction)
 
 # return the range of differences of two strings
 def dif_region2(s1, s2): # two strings do not need to have the same length
 	s1r = s1[::-1] # reverse the string
 	s2r = s2[::-1] # reverse the string
-	L1 = [i for i in xrange(min([len(s1),len(s2)])) if s1[i] != s2[i]] # forward
-	L2 = [i for i in xrange(min([len(s1),len(s2)])) if s1r[i] != s2r[i]] # reverse
+	L1 = [i for i in range(min([len(s1),len(s2)])) if s1[i] != s2[i]] # forward
+	L2 = [i for i in range(min([len(s1),len(s2)])) if s1r[i] != s2r[i]] # reverse
 	return [L1[0], -L2[0]]
 
 def seq2pattern(seq):
@@ -190,25 +190,25 @@ def check_pattern(enzyme, wild_seq, mut_seq): # check whether enzyme can match w
 				# if the left first different nt between wt and mut is in the enzyme recognization site and the change position is more than 1 nt from it.
 				if pos_L in range(m.start(), m.end()) and pos_L - change_pos > 1:
 					enzyme.primer_direction = "left" # use as left primer end positions
-					enzyme.primer_end_pos += range(change_pos + 1, pos_L)
+					enzyme.primer_end_pos += list(range(change_pos + 1, pos_L))
 					change_pos = m.start() + i # which was changed
-					print "One nt can be changed to fit enzyme", enzyme.name
+					print("One nt can be changed to fit enzyme", enzyme.name)
 					enzyme.dcaps = "Yes"
 					enzyme.template_seq = wild_seq[:change_pos] + enzyme_seq[i].upper() + wild_seq[change_pos+1:]
 					enzyme.change_pos = change_pos
-					print "change position and primer end postions are ", change_pos, enzyme.primer_end_pos
+					print("change position and primer end postions are ", change_pos, enzyme.primer_end_pos)
 					# break the loop if one change postion is found, because I do not think we need many
 					break
 				
 				if pos_R in range(m.start(), m.end()) and change_pos - pos_R > 1:
 					enzyme.primer_direction = "right" # use as right primer end positions
-					enzyme.primer_end_pos += range(pos_R + 1, change_pos)
+					enzyme.primer_end_pos += list(range(pos_R + 1, change_pos))
 					change_pos = m.start() + i # which was changed
-					print "One nt can be changed to fit enzyme", enzyme.name
+					print("One nt can be changed to fit enzyme", enzyme.name)
 					enzyme.dcaps = "Yes"
 					enzyme.template_seq = wild_seq[:change_pos] + enzyme_seq[i].upper() + wild_seq[change_pos+1:]
 					enzyme.change_pos = change_pos
-					print "change position and primer end postions are ", change_pos, enzyme.primer_end_pos
+					print("change position and primer end postions are ", change_pos, enzyme.primer_end_pos)
 					break
 		# break the loop if dcaps found
 		if enzyme.dcaps == "Yes":
@@ -234,7 +234,7 @@ def test_enzyme(enzyme, wild_seq, mut_seq): # enzyme is an Restriction_Enzyme ob
 	if len(wild_allpos) != len(mut_allpos): # snp cause digestion difference
 		enzyme.caps = "Yes"
 		enzyme.template_seq = wild_seq
-		print "CAPS found with enzyme ", enzyme_name
+		print("CAPS found with enzyme ", enzyme_name)
 		return enzyme
 	# else no caps found, check dcaps
 	#snp_pos = string_dif(wild_seq, mut_seq)[0] # snp position in the template
@@ -297,7 +297,7 @@ def caps(seqA, seqB, max_price): # two alleles now support indels or long haplot
 	snpname = "SNP"
 	getcaps_path = os.path.dirname(os.path.realpath(__file__))
 	out = "available_enzymes.txt"
-	print "Output selected CAPS file name is: ", out
+	print("Output selected CAPS file name is: ", out)
 
 	################## Get CAPS information
 	# step 1: read the enzyme file
@@ -319,8 +319,8 @@ def caps(seqA, seqB, max_price): # two alleles now support indels or long haplot
 			caps_list.append(enzyme)
 		elif enzyme.dcaps == "Yes":
 			dcaps_list.append(enzyme)
-	print "caps_list is ", [x.name for x in caps_list]
-	print "dcaps_list is ", [x.name for x in dcaps_list]
+	print("caps_list is ", [x.name for x in caps_list])
+	print("dcaps_list is ", [x.name for x in dcaps_list])
 
 	outfile = open(out, 'w')
 	#outfile.write("CAPS cut information\n") # change to 1 based

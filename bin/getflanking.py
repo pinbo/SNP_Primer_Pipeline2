@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  getkasp
@@ -127,7 +127,7 @@ max_hit = 6
 from collections import Counter
 ct = Counter(snp_list) # count of each snp hits
 for i in ct:
-	print i, "has hits", ct[i]
+	print((i, "has hits", ct[i]))
 
 # output
 out = open(outfile, "w")

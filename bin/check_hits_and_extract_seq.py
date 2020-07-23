@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  check_hits_and_extract_seq
@@ -34,7 +34,7 @@ from glob import glob
 def check_hit(infile):
 	num_lines = sum(1 for line in open(infile) if line.strip())
 	if num_lines > 10:
-		print infile, "has more than 10 hits. Please check!!!\n"
+		print(infile, "has more than 10 hits. Please check!!!\n")
 		os.rename(infile, "problem_" + infile)
 		return 0
 	return 1
@@ -42,7 +42,7 @@ def check_hit(infile):
 def extract_seq(range_file, reference):
 	flanking_file = "flanking_" + range_file + ".fa"
 	cmd = "blastdbcmd -entry_batch " + range_file + " -db " + reference + " > " + flanking_file
-	print cmd
+	print(cmd)
 	call(cmd, shell=True)
 
 def main():

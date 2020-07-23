@@ -1,6 +1,6 @@
 <tool id="snpmarker" name="SNP Primer Design">
   <description>for each sequence in a CSV file</description>
-  <command interpreter="python2">run_getkasp.py $input $price $CAPS $KASP $maxTm $maxSize $pick_anyway $reference</command>
+  <command interpreter="python">run_getkasp.py $input $price $CAPS $KASP $maxTm $maxSize $pick_anyway $reference</command>
   <inputs>
     <param format="txt" name="input" type="data" label="CSV file"/>
     <param name="reference" type="select" label="Which reference to use?">

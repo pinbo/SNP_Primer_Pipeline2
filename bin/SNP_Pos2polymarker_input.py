@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  SNP_Pos2polymarker_input.py
@@ -101,7 +101,7 @@ def prepare_seq_range(snpdict, seq_name_list, outfile): # seq_name_list to make 
 def get_flanking(range_file, flanking_file, reference):
 	#reference = "/Library/WebServer/Documents/blast/db/nucleotide/IWGSC_v2_ChrU.fa"
 	cmd = "blastdbcmd -entry_batch " + range_file + " -db " + reference + " > " + flanking_file
-	print "Command to get the flanking sequences for each SNP\n", cmd
+	print("Command to get the flanking sequences for each SNP\n", cmd)
 	call(cmd, shell=True)
 
 # function to extract sequences from a fasta file 
@@ -132,7 +132,7 @@ def main(argv):
 	# reference = reference_list[int(argv[3]) - 1] # 1 or 2 for reference
 	reference = argv[3]
 	snpdict, seq_name_list = parse_exon_snp(snpinfo)
-	print "length of snpdict ", len(snpdict)
+	print("length of snpdict ", len(snpdict))
 	range_file = "temp_range.txt"
 	prepare_seq_range(snpdict, seq_name_list, range_file)
 	flanking_file = "flanking_seq.fa"

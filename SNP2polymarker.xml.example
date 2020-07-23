@@ -1,6 +1,6 @@
 <tool id="snp2polymarker" name="SNP Position to Polymarker Input">
   <description>for exon capture SNP positions</description>
-  <command interpreter="python2">bin/SNP_Pos2polymarker_input.py $input for_polymarker.csv $reference</command>
+  <command interpreter="python">bin/SNP_Pos2polymarker_input.py $input for_polymarker.csv $reference</command>
   <inputs>
     <param format="txt" name="input" type="data" label="Space or Tab-delimited file"/>
     <param name="reference" type="select" label="Which reference to use?">

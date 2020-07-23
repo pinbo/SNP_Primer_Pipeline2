@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  getcaps
@@ -245,7 +245,7 @@ def ReverseComplement(seq):
 
 
 def string_dif(s1, s2): # two strings with equal length
-	return [i for i in xrange(len(s1)) if s1[i] != s2[i]]
+	return [i for i in range(len(s1)) if s1[i] != s2[i]]
 
 def seq2pattern(seq):
 	iupac = {
@@ -285,15 +285,15 @@ def check_pattern(enzyme, wild_seq, mut_seq): # check whether enzyme can match w
 			if snp_pos in range(m.start(), m.end()) and not re.search(ss, mut_seq[m.start():m.end()]):
 				change_pos = m.start() + i # which was changed
 				if abs(snp_pos - change_pos) > 1: # to insure the introduced mutaton is at least 2 bases far from the snp
-					print "One nt can be changed to fit enzyme", enzyme.name
+					print(("One nt can be changed to fit enzyme", enzyme.name))
 					enzyme.dcaps = "Yes"
 					enzyme.template_seq = wild_seq[:change_pos] + enzyme_seq[i].upper() + wild_seq[change_pos+1:]
 					enzyme.change_pos = change_pos + 1 # 1 based
 					enzyme.potential_primer = enzyme.template_seq[(snp_pos - 20):snp_pos] + "[" + SNP_A + "/" + SNP_B + "]" + enzyme.template_seq[(snp_pos + 1):(snp_pos + 21)]  # show changed sequences
 					if change_pos < snp_pos:
-						enzyme.primer_end_pos = range(change_pos + 1, snp_pos) # a list of primer end positions
+						enzyme.primer_end_pos = list(range(change_pos + 1, snp_pos)) # a list of primer end positions
 					else:
-						enzyme.primer_end_pos = range(snp_pos + 1, change_pos) # a list of primer end positions
+						enzyme.primer_end_pos = list(range(snp_pos + 1, change_pos)) # a list of primer end positions
 					#print "change position and primer end postions are ", change_pos, enzyme.primer_end_pos
 					break
 		# break the loop if dcaps found
@@ -318,7 +318,7 @@ def test_enzyme(enzyme, wild_seq, mut_seq): # enzyme is an Restriction_Enzyme ob
 	if len(wild_allpos) != len(mut_allpos): # snp cause digestion difference
 		enzyme.caps = "Yes"
 		enzyme.template_seq = wild_seq
-		print "CAPS found with enzyme ", enzyme_name
+		print(("CAPS found with enzyme ", enzyme_name))
 		return enzyme
 	# else no caps found, check dcaps
 	#snp_pos = string_dif(wild_seq, mut_seq)[0] # snp position in the template
@@ -482,7 +482,7 @@ def format_primer_seq(primer, variation): # input is a primer object and variati
 		seq = ReverseComplement(primer.seq)
 		#primer_range = range(primer.end - 1, primer.start)
 	
-	primer_range = range(start - 1, end)
+	primer_range = list(range(start - 1, end))
 	var_sites = set(variation).intersection(primer_range)
 	var_sites_relative = [i - start + 1 for i in var_sites]
 	#seq = primer.seq.lower()
@@ -503,14 +503,14 @@ def caps(seqfile):
 	#snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
 	snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
 	snp_pos = int(pos) - 1 # 0-based
-	print "snpname, chrom, allele, pos ", snpname, chrom, allele, pos
+	print(("snpname, chrom, allele, pos ", snpname, chrom, allele, pos))
 	getcaps_path = os.path.dirname(os.path.realpath(__file__))
 	global_setting_file = getcaps_path + "/global_settings.txt"
 	directory = "CAPS_output"
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 	out = directory + "/selected_CAPS_primers_" + snpname + ".txt"
-	print "Output selected CAPS file name is: ", out
+	print(("Output selected CAPS file name is: ", out))
 	
 	# software path
 	primer3_path, muscle_path = get_software_path(getcaps_path)
@@ -530,7 +530,7 @@ def caps(seqfile):
 	REs = parse_RE_file(RE_file) # get the list of restriction enzymes
 	# step 2: get the list of enzymes that can be used for caps or dcaps
 	SNP_A, SNP_B = iupac[allele] # SNP 2 alleles
-	print "SNP_A, SNP_B ", SNP_A, SNP_B
+	print(("SNP_A, SNP_B ", SNP_A, SNP_B))
 	wild_seq = seq_template[:snp_pos] + SNP_A + seq_template[snp_pos+1:]
 	mut_seq = seq_template[:snp_pos] + SNP_B + seq_template[snp_pos+1:]
 	caps_list = []
@@ -544,15 +544,15 @@ def caps(seqfile):
 			caps_list.append(enzyme)
 		elif enzyme.dcaps == "Yes":
 			dcaps_list.append(enzyme)
-	print "caps_list is ", [x.name for x in caps_list]
-	print "dcaps_list is ", [x.name for x in dcaps_list]
+	print(("caps_list is ", [x.name for x in caps_list]))
+	print(("dcaps_list is ", [x.name for x in dcaps_list]))
 	variation = [] # variation sites that can differ ALL
 	variation2 = [] # variation sites that can differ at least 2 homeologs
 	
 	# STEP 0: create alignment file and primer3output file
 	RawAlignFile = "alignment_raw_" + snpname + ".fa"
 	alignmentcmd = muscle_path + " -in " + seqfile2 + " -out " + RawAlignFile + " -quiet"
-	print "Alignment command: ", alignmentcmd
+	print(("Alignment command: ", alignmentcmd))
 	call(alignmentcmd, shell=True)
 	
 	#########################
@@ -606,7 +606,7 @@ def caps(seqfile):
 		p3input.close()
 		
 		if n == 0:
-			print "No primer3 input were found"
+			print("No primer3 input were found")
 			outfile = open(out, 'w')
 			outfile.write("\nCAPS cut information for SNP " + snpname + "\n") # change to 1 based
 			outfile.write("Enzyme\tEnzyme_seq\tChange_pos\tOther_cut_pos\tPotential_primer\n")
@@ -620,7 +620,7 @@ def caps(seqfile):
 		# primer3 output file
 		primer3output = directory + "/primer3.output." + snpname
 		p3cmd = primer3_path + " -default_version=2 -output=" + primer3output + " -p3_settings_file=" + global_setting_file + " " + primer3input
-		print "Primer3 command 1st time: ", p3cmd
+		print(("Primer3 command 1st time: ", p3cmd))
 		call(p3cmd, shell=True)
 		primerpairs = parse_primer3output(primer3output, 5)
 	else: # if there are homeolog sequences	
@@ -629,11 +629,11 @@ def caps(seqfile):
 		########################
 		# read alignment file
 		fasta = get_fasta(RawAlignFile)				
-		print "The target: ", target
-		print "The other groups: ", ids
+		print(("The target: ", target))
+		print(("The other groups: ", ids))
 
 		alignlen = len(fasta[target])
-		print "Alignment length: ", alignlen
+		print(("Alignment length: ", alignlen))
 		
 		# get the target ID template base coordinate in the alignment
 		t2a = {} # template to alignment
@@ -646,8 +646,8 @@ def caps(seqfile):
 			t2a[i - ngap] = i
 			a2t[i] = i - ngap
 
-		print "last key of t2a", i - ngap
-		print "last key of a2t", i
+		print(("last key of t2a", i - ngap))
+		print(("last key of a2t", i))
 		
 		seq_template = fasta[target].replace("-","") # remove all gaps
 		variation = [] # variation sites that can differ ALL
@@ -657,7 +657,7 @@ def caps(seqfile):
 		gap_left_target = len(fasta[target]) - len(fasta[target].lstrip('-'))
 		gap_left = max([len(v) - len(v.lstrip('-')) for k, v in fasta.items()])
 		gap_right = min([len(v.rstrip('-')) for k, v in fasta.items()])
-		print "gap_left_target, gap_left and gap_right: ", gap_left_target, gap_left, gap_right
+		print(("gap_left_target, gap_left and gap_right: ", gap_left_target, gap_left, gap_right))
 		
 		diffarray = {} # a list of 0 or 1: the same as or different from the site in each sequences of ids
 		for i in range(gap_left, gap_right): # exclude 20 bases on each side
@@ -697,8 +697,8 @@ def caps(seqfile):
 				if pos_template not in variation2: # in case multiple gaps
 					variation2.append(pos_template)
 		
-		print "Sites that can differ all\n", variation
-		print "\nSites that can differ at least 1\n", variation2
+		print(("Sites that can differ all\n", variation))
+		print(("\nSites that can differ at least 1\n", variation2))
 		#print "\nKeys of diffarray: ", diffarray.keys()
 		
 		########################################################
@@ -757,7 +757,7 @@ def caps(seqfile):
 		p3input.close()
 		
 		if n == 0:
-			print "No primer3 input were found"
+			print("No primer3 input were found")
 			outfile = open(out, 'w')
 			outfile.write("Sites that can differ all for " + snpname + "\n")
 			outfile.write(", ".join([str(x + 1) for x in variation])) # change to 1 based
@@ -773,7 +773,7 @@ def caps(seqfile):
 		# primer3 output file
 		primer3output = directory + "/primer3.output." + snpname
 		p3cmd = primer3_path + " -default_version=2 -output=" + primer3output + " -p3_settings_file=" + global_setting_file + " " + primer3input
-		print "Primer3 command 1st time: ", p3cmd
+		print(("Primer3 command 1st time: ", p3cmd))
 		call(p3cmd, shell=True)
 
 		##########################

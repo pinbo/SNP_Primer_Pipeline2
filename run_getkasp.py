@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  run_getkasp.py
@@ -48,51 +48,51 @@ def main(args):
 	
 	# step 1:
 	cmd1 = script_path + "parse_polymarker_input.py " + polymarker_input
-	print "Step 1: Parse polymarker input command:\n", cmd1
+	print("Step 1: Parse polymarker input command:\n", cmd1)
 	call(cmd1, shell=True)
 	
 	#step 2: blast
 	cmd2 = 'blastn -task blastn -db ' + reference + ' -query for_blast.fa -outfmt "6 std qseq sseq slen" -word_size 11 -num_threads 3 -out blast_out.txt'
-	print "Step 2: Blast command:\n", cmd2
+	print("Step 2: Blast command:\n", cmd2)
 	call(cmd2, shell=True)
 	
 	# Step 3: parse the blast output file and output the homelog contigs and flanking ranges
 	cmd3 = script_path + "getflanking.py " + polymarker_input + " blast_out.txt temp_range.txt "
-	print "Step 3: Get the flanking range command:\n", cmd3
+	print("Step 3: Get the flanking range command:\n", cmd3)
 	call(cmd3, shell=True)
 	
 	# step 4: split file for each marker
 	# gawk '{ print $2,$3,$4 > "temp_marker_"$1".txt" }' temp_range.txt
 	cmd4 = "gawk  '{ print $2,$3,$4 > \"temp_marker_\"$1\".txt\" }' temp_range.txt"
-	print "Step 4: Flanking range for each marker command:\n", cmd4
+	print("Step 4: Flanking range for each marker command:\n", cmd4)
 	call(cmd4, shell=True)
 	
 	# step 5: get flanking sequences for each file
 	# find . -iname "temp_marker*" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db  reference  > flanking_{}.fa'
 	cmd5 = "find . -iname \"temp_marker*\" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db " + reference + " > flanking_{}.fa'"
-	print "Step 5: Get flanking sequences for each marker command:\n", cmd5
+	print("Step 5: Get flanking sequences for each marker command:\n", cmd5)
 	call(cmd5, shell=True)
 	
 	# step 6: get kasp
 	if kasp:
 		cmd6 = script_path + "getkasp3.py " + max_Tm + " " + max_size + " " + pick_anyway # add blast option
-		print "Step 6: Get KASP primers for each marker command:\n", cmd6
+		print("Step 6: Get KASP primers for each marker command:\n", cmd6)
 		call(cmd6, shell=True)
 
 	# step 7: get CAPS markers
 	if caps:
 		cmd9 = script_path + "getCAPS.py " + price + " " + max_Tm + " " + max_size + " " + pick_anyway # add blast option and price
-		print "Step 9: Get CAPS and dCAPS primers for each marker command:\n", cmd9
+		print("Step 9: Get CAPS and dCAPS primers for each marker command:\n", cmd9)
 		call(cmd9, shell=True)
 	
 	# step 8: concatenate output files
 	caps_files = glob("CAPS_output/selected_CAPS_primers*")
 	kasp_files = glob("KASP_output/selected_KASP_primers*")
-	print "all output files are: ", caps_files
+	print("all output files are: ", caps_files)
 	cmd10 = "cat CAPS_output/selected_CAPS_primers* > Potential_CAPS_primers.tsv"
 	cmd11 = "cat KASP_output/selected_KASP_primers* > Potential_KASP_primers.tsv"
 	cmd12 = "cat alignment_raw_* > All_alignment_raw.fa"
-	print "Concatenate all output files to single files\n", cmd10, "\n", cmd11, "\n", cmd12
+	print("Concatenate all output files to single files\n", cmd10, "\n", cmd11, "\n", cmd12)
 	if caps:
 		call(cmd10, shell=True)
 	if kasp:
@@ -120,7 +120,7 @@ def main(args):
 				outfile.write(infile.read())
 				outfile.write("\n\n")
 	outfile.close()
-	print "\n\n\n KASP primers have been designed successfully!\n Check files beginning with 'select_primer' and CAPS_output.txt"
+	print("\n\n\n KASP primers have been designed successfully!\n Check files beginning with 'select_primer' and CAPS_output.txt")
 	return 0
 
 if __name__ == '__main__':

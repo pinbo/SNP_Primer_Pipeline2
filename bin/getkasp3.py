@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  getkasp
@@ -363,7 +363,7 @@ def format_primer_seq(primer, variation): # input is a primer object and variati
 		seq = ReverseComplement(primer.seq.lower())
 		#primer_range = range(primer.end - 1, primer.start)
 	
-	primer_range = range(start - 1, end)
+	primer_range = list(range(start - 1, end))
 	var_sites = set(variation).intersection(primer_range)
 	var_sites_relative = [i - start + 1 for i in var_sites]
 	#seq = primer.seq.lower()
@@ -400,8 +400,8 @@ def kasp(seqfile):
 	
 	# get target and ids and rename fasta seq names
 	fasta_raw, target, ids = get_fasta2(seqfile, chrom) # target is the target chromosome, ids are other non-target chromosome name list
-	print "target ", target
-	print "others ", ids
+	print(("target ", target))
+	print(("others ", ids))
 	# write the renamed fasta seq to a file
 	seqfile2 = "renamed_" + seqfile
 	out_temp = open(seqfile2, "w")
@@ -416,7 +416,7 @@ def kasp(seqfile):
 	# STEP 0: create alignment file and primer3output file
 	RawAlignFile = "alignment_raw_" + snpname + ".fa"
 	alignmentcmd = muscle_path + " -in " + seqfile2 + " -out " + RawAlignFile + " -quiet"
-	print "Alignment command: ", alignmentcmd
+	print(("Alignment command: ", alignmentcmd))
 	call(alignmentcmd, shell=True)
 	settings_common = "PRIMER_TASK=generic" + "\n" + \
 		"SEQUENCE_TEMPLATE=" + seq_template + "\n" + \
@@ -458,7 +458,7 @@ def kasp(seqfile):
 		# primer3 output file
 		primer3output = directory + "/primer3.output." + snpname
 		p3cmd = primer3_path + " -default_version=2 -output=" + primer3output + " -p3_settings_file=" + global_setting_file + " " + primer3input
-		print "Primer3 command 1st time: ", p3cmd
+		print(("Primer3 command 1st time: ", p3cmd))
 		call(p3cmd, shell=True)
 		primerpairs = parse_primer3output(primer3output, 5)
 		# Get primer list for blast
@@ -478,11 +478,11 @@ def kasp(seqfile):
 		# read alignment file
 		fasta = get_fasta(RawAlignFile)
 		# get the variaiton site among sequences
-		print "The target: ", target
-		print "The other groups: ", ids
+		print(("The target: ", target))
+		print(("The other groups: ", ids))
 
 		alignlen = len(fasta[target])
-		print "Alignment length: ", alignlen
+		print(("Alignment length: ", alignlen))
 		
 		# get the target ID template base coordinate in the alignment
 		t2a = {} # template to alignment
@@ -495,8 +495,8 @@ def kasp(seqfile):
 			t2a[i - ngap] = i
 			a2t[i] = i - ngap
 
-		print "last key of t2a", i - ngap
-		print "last key of a2t", i
+		print(("last key of t2a", i - ngap))
+		print(("last key of a2t", i))
 		
 		seq_template = fasta[target].replace("-","") # remove all gaps
 
@@ -507,7 +507,7 @@ def kasp(seqfile):
 		gap_left_target = len(fasta[target]) - len(fasta[target].lstrip('-'))
 		gap_left = max([len(v) - len(v.lstrip('-')) for k, v in fasta.items()])
 		gap_right = min([len(v.rstrip('-')) for k, v in fasta.items()])
-		print "gap_left_target, gap_left and gap_right: ", gap_left_target, gap_left, gap_right
+		print(("gap_left_target, gap_left and gap_right: ", gap_left_target, gap_left, gap_right))
 		
 		diffarray = {} # a list of 0 or 1: the same as or different from the site in each sequences of ids
 		#for i in range(alignlen):
@@ -548,8 +548,8 @@ def kasp(seqfile):
 				if pos_template not in variation2: # in case multiple gaps
 					variation2.append(pos_template)
 		
-		print "Sites that can differ all\n", variation
-		print "\nSites that can differ at least 1\n", variation2
+		print(("Sites that can differ all\n", variation))
+		print(("\nSites that can differ at least 1\n", variation2))
 		#print "\nKeys of diffarray: ", diffarray.keys()
 		#############
 		# loop to write primer3 input for each variation site
@@ -583,10 +583,10 @@ def kasp(seqfile):
 		# primer3 output file
 		primer3output = directory + "/primer3.output." + snpname
 		p3cmd = primer3_path + " -default_version=2 -output=" + primer3output + " -p3_settings_file=" + global_setting_file + " " + primer3input
-		print "Primer3 command 1st time: ", p3cmd
+		print(("Primer3 command 1st time: ", p3cmd))
 		call(p3cmd, shell=True)
 		primerpairs = parse_primer3output(primer3output, 1)
-		print "primerpairs length ", len(primerpairs)
+		print(("primerpairs length ", len(primerpairs)))
 		####################################
 		# Get primer list for blast
 		#primer_for_blast = {}
@@ -607,11 +607,11 @@ def kasp(seqfile):
 					pc = pl # pc is the common primer
 					# print "pc = pl"
 					# rr: range to check; only check 10 bases from 3' end
-					rr = range(max(pc.end - 10,gap_left), pc.end) # pc.end is 1 based, so change to 0 based.
+					rr = list(range(max(pc.end - 10,gap_left), pc.end)) # pc.end is 1 based, so change to 0 based.
 				else:
 					pc = pr
 					# print "pc = pr"
-					rr = range(pc.end -1, min(pc.end + 9, len(seq_template) - 20)) # rr should be within the keys of diffarray, which is from gap_left to gap_right
+					rr = list(range(pc.end -1, min(pc.end + 9, len(seq_template) - 20))) # rr should be within the keys of diffarray, which is from gap_left to gap_right
 				# print "gap_left ", gap_left
 				# print "len(seq_template) ", len(seq_template)
 				# print "pc.end ", pc.end
