@@ -1,5 +1,7 @@
 # SNP Primer Design Pipeline 2
-These scripts make a simple pipeline to design **KASP** (Kompetitive Allele Specific PCR) and **CAPS/dCAPS** primers for SNP genotyping. Compared to **SNP Primer Design Pipeline** (1), this version should be able to design primers for KASP/CAPS primers for **ANY species**, not just polyploid wheat.
+These scripts make a simple pipeline to design **KASP** (Kompetitive Allele Specific PCR) and **CAPS/dCAPS** primers for SNP genotyping. Compared to **[SNP Primer Design Pipeline](https://github.com/pinbo/SNP_Primer_Pipeline)** (1), this version should be able to design primers for KASP/CAPS primers for **ANY species**, not just polyploid wheat. I have not tested in other species, so please open a new issue!
+
+Please also send me an email if it works for your species. I will add it here, so others can try without problems. Thanks!
 
 
 # Usage
@@ -44,8 +46,9 @@ NO space is allowed. It includes Gene ID, chromosome/contig where it is located,
 5. Use the msa file to design primers using primer3
 
 # Main Changes
-- 07/22/2020: Update all code to run with python3 (use 2to3 to convert python2 script to python3 script)
-- 07/22/2020: Update to **SNP Primer Design Pipeline 2** for any species
+- 07/23/2020: Now supports guessing the best chromosome/contig location based on the blast result: if the chromosome name in the SNP input file did not have any matches in the blast result, it will use the best hit as target chromosome.
+- 07/22/2020: Update all code to run with python3 (use `2to3` to convert python2 script to python3 script)
+- 07/22/2020: Update to **SNP Primer Design Pipeline 2** for ANY species (before it was just for wheat. Now should be able to work for any species with any ploidy)
 - 10/23/2019: Change all script to use python2 and make it easy for users to implement on there Galaxy server.
 - 09/02/2019: add "PRIMER\_PICK\_ANYWAY" option for the situation when no primers were obtained.
 - 09/01/2019: add a primer3 global setting file for easy change some parameters.
@@ -83,7 +86,7 @@ I suggest put both the "**SNP Position to polymarker input**" and the "**SNP Des
 1. Edit the configuration files "SNP2polymarker.xml" and "getkasp.xml". At least change the reference file location (Red rectangle in the screenshot below): "value=" is the location.
 ![change reference location](./files/change-references.png)
 
-1. Go back to the Galaxy root folder and go to the "config" folder and add the tool xml location in the file "*tool\_conf.xml*". If the file is not there, just make a copy of "*tool\_conf.xml.sample*" and rename it "*tool\_conf.xml*". Then add the tool xml location there (The image below is from version 1, so change "SNP_Primer_Pipeline" to "SNP_Primer_Pipeline2"):
+1. Go back to the Galaxy root folder and go to the "config" folder and add the tool xml location in the file "*tool\_conf.xml*". If the file is not there, just make a copy of "*tool\_conf.xml.sample*" and rename it "*tool\_conf.xml*". Then add the tool xml location there (**The image below is from version 1, so change "SNP_Primer_Pipeline" to "SNP_Primer_Pipeline2"**):
 ```{xml}
 <section name="SNP_Primer_Design" id="snp_primer">
     <tool file="SNP_Primer_Pipeline2/getkasp.xml" />
