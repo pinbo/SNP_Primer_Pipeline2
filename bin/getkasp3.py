@@ -27,6 +27,10 @@
 
 # change the input wildcard and the paths of primer3 and muscle accordingly.
 # NOTES: the output primer pair includes the common primer and the primer with SNP A or T, you need to change the 3' nucleartide to get the primer for the other SNP.
+# 
+
+# Usage: getkasp3.py maximum_primer_Tm maximum_primer_size whether_to_pick_anyway (1 is yes, 0 is NO)
+# example:  ../bin/getkasp3.py 63 25  0
 
 ### Imported
 from subprocess import call
@@ -34,8 +38,7 @@ import getopt, sys, os, re
 from glob import glob
 import copy
 #########################
-
-#blast = int(sys.argv[1]) # 0 or 1, whether to blast
+## input
 max_Tm = sys.argv[1] # max Tm, default 63, can be increased in case high GC region
 max_size = sys.argv[2] # max primer size, default 25, can be increased in case low GC region
 pick_anyway = sys.argv[3] # pick primer anyway even if it violates specific constrains
@@ -379,8 +382,7 @@ def kasp(seqfile):
 	#flanking_temp_marker_IWB1855_7A_R_251.fa
 	#snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
 	snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
-	print "Pos ", pos
-	#chrom = chrom[0:2] # no arm
+	#print "Pos ", pos
 	snp_site = int(pos) - 1 # 0-based
 	getkasp_path = os.path.dirname(os.path.realpath(__file__))
 	global_setting_file = getkasp_path + "/global_settings.txt"
@@ -388,7 +390,6 @@ def kasp(seqfile):
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 	out = directory + "/selected_KASP_primers_" + snpname + ".txt"
-	target = "2AS" # target sequence name
 	product_min = 50
 	product_max = 250
 	alt_allele = iupac[allele][0] # choose A or T
@@ -398,7 +399,7 @@ def kasp(seqfile):
 	primer3_path, muscle_path = get_software_path(getkasp_path)
 	
 	# get target and ids and rename fasta seq names
-	fasta_raw, target, ids = get_fasta2(seqfile, chrom)
+	fasta_raw, target, ids = get_fasta2(seqfile, chrom) # target is the target chromosome, ids are other non-target chromosome name list
 	print "target ", target
 	print "others ", ids
 	# write the renamed fasta seq to a file
@@ -469,37 +470,14 @@ def kasp(seqfile):
 			if pp.product_size != 0:
 				pl = pp.left
 				pr = pp.right
-				# if pl.seq not in primer_for_blast:
-				# 	nL += 1
-				# 	pl.name = "L" + str(nL)
-				# 	primer_for_blast[pl.seq] = pl.name # use seq as keys
-				# else:
-				# 	pl.name = primer_for_blast[pl.seq]
-				# if pr.seq not in primer_for_blast:
-				# 	nR += 1
-				# 	pr.name = "R" + str(nR)
-				# 	primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
-				# else:
-				# 	pr.name = primer_for_blast[pr.seq]
 				pp.left = pl
 				pp.right = pr
 				final_primers[i] = pp
 	else: # if there are homeolog sequences	
 		########################
-		
-		
-		########################
 		# read alignment file
 		fasta = get_fasta(RawAlignFile)
 		# get the variaiton site among sequences
-		#ids = [] # all other sequence names
-		#for kk in fasta.keys():
-			#key_chr = kk.split("_")[2] # sequence chromosome name
-			#if chrom in key_chr or key_chr in chrom: # 3B contig names do not have chromosome arm
-				#target = kk
-			#else:
-				#ids.append(kk)
-				
 		print "The target: ", target
 		print "The other groups: ", ids
 
@@ -642,18 +620,6 @@ def kasp(seqfile):
 				aa = [sum(x) for x in zip(*(diffarray[k] for k in rr))]
 				#print "aa ", aa
 				if min(aa) > 0: # if common primer can differ all
-					# if pl.seq not in primer_for_blast:
-					# 	nL += 1
-					# 	pl.name = "L" + str(nL)
-					# 	primer_for_blast[pl.seq] = pl.name # use seq as keys
-					# else:
-					# 	pl.name = primer_for_blast[pl.seq]
-					# if pr.seq not in primer_for_blast:
-					# 	nR += 1
-					# 	pr.name = "R" + str(nR)
-					# 	primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
-					# else:
-					# 	pr.name = primer_for_blast[pr.seq]
 					pp.left = pl
 					pp.right = pr
 					final_primers[i] = pp
@@ -661,11 +627,6 @@ def kasp(seqfile):
 	# write to file
 	outfile = open(out, 'w')
 	outfile.write("index\tproduct_size\ttype\tstart\tend\tvariation number\t3'diffall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\n")			
-	# blast primers
-	# blast_hit = {}
-	# outfile_blast = directory + "/primer_blast_out_" + snpname + ".txt"
-	# if blast and len(primer_for_blast) > 0:
-	# 	blast_hit = primer_blast(primer_for_blast, outfile_blast) # chromosome hit for each primer
 	# write output file
 	for i, pp in final_primers.items():
 		pl = format_primer_seq(pp.left, variation)
@@ -701,4 +662,4 @@ def kasp(seqfile):
 
 for ff in raw:
 	kasp(ff)
-	
+

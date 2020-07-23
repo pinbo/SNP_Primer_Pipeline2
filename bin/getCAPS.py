@@ -28,13 +28,13 @@
 # change the input wildcard and the paths of primer3 and muscle accordingly.
 # NOTES: the output primer pair includes the common primer and the primer with SNP A or T, you need to change the 3' nucleartide to get the primer for the other SNP.
 
+# Usage: getCAPS maximum_enzyme_price ($ per 1000 U) maximum_primer_Tm maximum_primer_size whether_to_pick_anyway (1 is yes, 0 is NO)
 ### Imported
 from subprocess import call
 import getopt, sys, os, re
 from glob import glob
 #########################
 
-#blast = int(sys.argv[1]) # 0 or 1, whether to blast
 max_price = int(sys.argv[1])
 max_Tm = sys.argv[2] # max Tm, default 63, can be increased in case high GC region
 max_size = sys.argv[3] # max primer size, default 25, can be increased in case low GC region
@@ -57,8 +57,6 @@ raw = glob("flanking_temp_marker*") # All file names start from "flanking"
 raw.sort()
 
 iupac = {"R": "AG", "Y": "TC", "S": "GC", "W": "AT", "K": "TG", "M": "AC"}
-
-
 
 # classes
 class Restriction_Enzyme(object):
@@ -106,9 +104,6 @@ class PrimerPair(object):
 		self.penalty = "NA"
 		self.product_size = 0
 
-
-
-
 #from sys import platform
 def get_software_path(base_path):
 	if sys.platform.startswith('linux'): # linux
@@ -121,8 +116,6 @@ def get_software_path(base_path):
 		primer3_path = base_path + "/primer3_core_darwin64"
 		muscle_path = base_path + "/muscle3.8.31_i86darwin64"
 	return primer3_path, muscle_path
-
-
 
 # simple Tm calculator
 def Tm(seq):
@@ -340,8 +333,6 @@ def test_enzyme(enzyme, wild_seq, mut_seq): # enzyme is an Restriction_Enzyme ob
 		enzyme = check_pattern(enzyme, mut_seq, wild_seq)
 	return enzyme
 
-
-
 # function to count mismtaches
 def mismatchn (s1, s2):
 	return sum(c1!=c2 for c1,c2 in zip(s1,s2))
@@ -508,10 +499,9 @@ def format_primer_seq(primer, variation): # input is a primer object and variati
 # parse the flanking sequence input
 
 def caps(seqfile):
-	#flanking_temp_marker_IWB1855_7A_R_251.fa
+	#flanking_temp_marker_IWB1855_7A_R_251.txt.fa
 	#snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
 	snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
-	#chrom = chrom[0:2] # no arm
 	snp_pos = int(pos) - 1 # 0-based
 	print "snpname, chrom, allele, pos ", snpname, chrom, allele, pos
 	getcaps_path = os.path.dirname(os.path.realpath(__file__))
@@ -638,17 +628,7 @@ def caps(seqfile):
 		
 		########################
 		# read alignment file
-		fasta = get_fasta(RawAlignFile)
-
-		## get the variaiton site among sequences
-		#ids = [] # all other sequence names
-		#for kk in fasta.keys():
-			#key_chr = kk.split("_")[2] # sequence chromosome name
-			#if chrom in key_chr or key_chr in chrom: # 3B contig names do not have chromosome arm
-				#target = kk
-			#else:
-				#ids.append(kk)
-				
+		fasta = get_fasta(RawAlignFile)				
 		print "The target: ", target
 		print "The other groups: ", ids
 
@@ -814,32 +794,11 @@ def caps(seqfile):
 		if pp.product_size != 0:
 			pl = pp.left
 			pr = pp.right
-			# if pl.seq not in primer_for_blast:
-			# 	nL += 1
-			# 	pl.name = "L" + str(nL)
-			# 	primer_for_blast[pl.seq] = pl.name # use seq as keys
-			# else:
-			# 	pl.name = primer_for_blast[pl.seq]
-			# if pr.seq not in primer_for_blast:
-			# 	nR += 1
-			# 	pr.name = "R" + str(nR)
-			# 	primer_for_blast[pr.seq] = pr.name # because a lot of same sequences
-			# else:
-			# 	pr.name = primer_for_blast[pr.seq]
 			pp.left = pl
 			pp.right = pr
 			final_primers[i] = pp
-				
-	# blast primers
-	# blast_hit = {}
-	outfile_blast = directory + "/primer_blast_out_" + snpname + ".txt"
-	# if blast and len(primer_for_blast) > 0:
-	# 	blast_hit = primer_blast(primer_for_blast, outfile_blast) # chromosome hit for each primer
 	# write output file
 	for i, pp in final_primers.items():
-		#varsite = int(i.split("-")[-1]) # variation site
-		#pl = pp.left
-		#pr = pp.right
 		pl = format_primer_seq(pp.left, variation)
 		pr = format_primer_seq(pp.right, variation)
 		# check whether 3' can differ all: not necessary for here, because I only used sites that can differ all.
