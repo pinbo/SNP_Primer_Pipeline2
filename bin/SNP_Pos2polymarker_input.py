@@ -29,7 +29,7 @@
 
 # example: 
 # SNP_Pos2polymarker_input.py <input> <output> <reference number>
-# SNP_Pos2polymarker_input.py snp_infor.txt for_polymarker.csv 1
+# SNP_Pos2polymarker_input.py snp_infor.txt for_polymarker.csv reference
 ##############################################
 # Modules needed
 from itertools import groupby
