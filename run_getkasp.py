@@ -70,7 +70,7 @@ def main(args):
 	# step 5: get flanking sequences for each file
 	# find . -iname "temp_marker*" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db  reference  > flanking_{}.fa'
 	#cmd5 = "find . -iname \"temp_marker*\" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db " + reference + " > flanking_{}.fa'"
-	cmd5="for i in temp_marker*; do blastdbcmd -entry_batch $i -db /Library/WebServer/Documents/blast/db/nucleotide/Kronos_EI_v1.fasta > flanking_$i.fa; done"
+	cmd5="for i in temp_marker*; do blastdbcmd -entry_batch $i -db " + reference + " > flanking_$i.fa; done"
 	print("Step 5: Get flanking sequences for each marker command:\n", cmd5)
 	call(cmd5, shell=True)
 	
