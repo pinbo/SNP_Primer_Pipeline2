@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 #  getkasp
@@ -381,7 +381,12 @@ def format_primer_seq(primer, variation): # input is a primer object and variati
 def kasp(seqfile):
 	#flanking_temp_marker_IWB1855_7A_R_251.fa
 	#snpname, chrom, allele, pos =re.split("_|\.", seqfile)[3:7]
-	snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
+	#snpname, chrom, allele, pos =re.split("_", seqfile[:-7])[3:7] # [:-7] remove .txt.fa in the file
+	info = re.split("_", seqfile[:-7])
+	snpname = info[3]
+	chrom = "_".join(info[4:-2])
+	allele = info[-2]
+	pos = info[-1]
 	#print "Pos ", pos
 	snp_site = int(pos) - 1 # 0-based
 	getkasp_path = os.path.dirname(os.path.realpath(__file__))
