@@ -28,7 +28,7 @@ The "bin" folder has all the scripts for each step and software **primer3** and 
 
 This software uses the same format as polymarker (http://www.polymarker.info/about), i.e. a csv file with each line looks like this:
 
-IWA7892,chr1B,AGGATTCACGGGAAAAGATTTCGTCGCA**[C/T]**GTGCTAGGGTCTTTGCAGAATGTTA
+IWA7892,chr1B,AGGATTCACGGGAAAAGATTTCGTCGCA[C/T]GTGCTAGGGTCTTTGCAGAATGTTA
 
 NO space is allowed. It includes Gene ID, chromosome/contig where it is located, flanking sequence (50 to 100 bp) with the alleles in the middle.
 
