@@ -18,10 +18,17 @@ You can run this step by step or run the whole pipeline with script "run_getkasp
 
 Example: `run_getkasp.py for_polymarker.csv 200 1 1 63 25 0 /home/junli/blastdb/iwgsc_refseqv1.0.fasta`
 
-**Inputs are**: polymarker_input, enzyme maximum price (per 1000 U), whether to design CAPS (1 for yes and 0 for NO), whether to design KASP (1 for yes and 0 for NO),  maximum Tm (63 C for example), maximum primer size (25 bp for example), whether to pick primer anyway even if it violates specific constrains (1 for yes and 0 for NO), reference file path.
+**Inputs are**: SNP files with the polymarker format (each line is a SNP with 3 comma separated fields: SNP name, chromosome/contig where it is located, flanking sequences), enzyme maximum price (per 1000 U), whether to design CAPS (1 for yes and 0 for NO), whether to design KASP (1 for yes and 0 for NO),  maximum Tm (63 C for example), maximum primer size (25 bp for example), whether to pick primer anyway even if it violates specific constrains (1 for yes and 0 for NO), reference file path.
 
+The "bin" folder has all the scripts for each step and software **primer3** and **muscle** in case your system does not have them.
 
-The "bin" folder has all the scripts for each step and software primer3 and muscle in case your system does not have them.
+# SNP file input example
+
+This software uses the same format as polymarker (http://www.polymarker.info/about), i.e. a csv file with each line looks like this:
+
+IWA7892,1BL,AGGATTCACGGGAAAAGATTTCGTCGCA**[C/T]**GTGCTAGGGTCTTTGCAGAATGTTA
+
+NO space is allowed. It includes Gene ID, chromosome/contig where it is located, flanking sequence (50 to 100 bp) with the alleles in the middle.
 
 # How it works
 1. Find all the different sites that can differ all other sequences from the user provided alignment file;
@@ -37,6 +44,7 @@ The "bin" folder has all the scripts for each step and software primer3 and musc
 5. Use the msa file to design primers using primer3
 
 # Main Changes
+- 07/22/2020: Update all code to run with python3 (use 2to3 to convert python2 script to python3 script)
 - 07/22/2020: Update to **SNP Primer Design Pipeline 2** for any species
 - 10/23/2019: Change all script to use python2 and make it easy for users to implement on there Galaxy server.
 - 09/02/2019: add "PRIMER\_PICK\_ANYWAY" option for the situation when no primers were obtained.
@@ -49,12 +57,12 @@ The "bin" folder has all the scripts for each step and software primer3 and musc
 # Dependencies
 
 SNP_Primer_Pipeline needs following 3 software to find differences among homeologs and design primer.
-1. **Python 2.7**: I have not updated the codes to fit python 3. Please install python2.7.
+1. **Python 3**: Please install python 3.x (default download will be python 3, because python 2 is not supported anymore)
 2. **Muscle**: Multiple sequence alignment program (http://www.drive5.com/muscle/)
 3. **Primer3**: program for designing PCR primers (http://primer3.sourceforge.net/)
 4. **BLAST+ 2.9.0** (or later) package from NCBI (https://blast.ncbi.nlm.nih.gov/Blast.cgi)
 
-"**muscle**" and "**primer3_core**" are included in the package, so "**BLAST+**" and "**Python 2.7**" software you need to install in your system.
+"**muscle**" and "**primer3_core**" are included in the package, so "**BLAST+**" and "**Python 3**" software you need to install in your system.
 
 # How to implement it to your own Galaxy server
 
