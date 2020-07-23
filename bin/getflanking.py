@@ -28,17 +28,9 @@
 ### Imported
 import sys
 
-# i'll assume it's tab-delimited...
-# and est is the query.
 polymarker_input = sys.argv[1]
 blast_file = sys.argv[2] # this is a special blast file with two columns in the last: qseq and sseq (query sequence and subject sequenc)
 outfile = sys.argv[3]
-# genome_number =  int(sys.argv[4])
-# if genome_number not in [1, 2, 3]:
-# 	sys.exit("Genome number need to be either 1, 2, or 3")
-
-# genomes = "ABD"
-# genomes = genomes[:genome_number] + "n" # final genomes + chrUn
 
 # get snp position
 snp_pos = {}
@@ -82,20 +74,13 @@ for line in open(blast_file):
 	fields = line.split("\t")
 	query, subject = fields[:2]
 	snp, qchrom = query.split("_")[0:2] # snp name, query chromosome name
-	#qchrom = qchrom[0:2] # no arm for pseudomolecule blast
-	#schrom = subject.split("_")[2] # subject chromosome name with arm
-	schrom = subject #[-2:] # chr6A as in the pseudomolecule. No chromosome arm
-	#print qchrom, schrom
-	# if schrom[1] not in genomes:
-	# 	continue
-	#pct_identity = float(fields[2]) # big gaps cause low identity
+	schrom = subject
 	pct_identity = 100 - (float(fields[4]) + float(fields[5])) / float(fields[3]) * 100 # to avoid big gaps
 	align_length = int(fields[3])
 	if snp not in snp_size_list:
 		snp_size_list.append(snp)
 		min_align = max(50, align_length * 0.9) # to filter out those not very good alignment, since I will blast anyway later.
 	# only get min-identity 90% and at least 50 bp alignment
-	#print "snp, min_align", snp, min_align
 	if pct_identity > 88 and align_length > min_align:
 		qstart, qstop, sstart, sstop = [int(x) for x in fields[6:10]]
 		qseq, sseq = fields[12:14]
@@ -131,15 +116,13 @@ for line in open(blast_file):
 		if sstart > sstop: # if minus strand
 			pos2 = down - pos + 1 # snp position in the extracted flanking sequences
 	
-		#if qchrom == schrom:
-		snpinfo[query] = query + "_" + str(pos2)
-		#flanking[query + "-" + subject] = "\t".join([subject, str(up) + "-" + str(down), strand])
-		#flanking[query + "-" + subject + "-" + str(sstart)] = "\t".join([subject, str(up) + "-" + str(down), strand])
+		if qchrom == schrom:
+			snpinfo[query] = query + "_" + str(pos2)
 		snp_list.append(query)
 		range_list.append("\t".join([subject, str(up) + "-" + str(down), strand]))
 
 # find out which has too many hits
-print snpinfo
+# print snpinfo
 max_hit = 6
 from collections import Counter
 ct = Counter(snp_list) # count of each snp hits
@@ -156,9 +139,5 @@ for i in range(len(snp_list)):
 		continue
 	rg = range_list[i]
 	out.write(snpinfo[snp] + "\t" + rg + "\n")
-
-#for k, v in flanking.items():
-#	k2 = k.split("-")[0] # key for snpinfo
-#	out.write(snpinfo[k2] + "\t" + v + "\n")
 	
 out.close()
