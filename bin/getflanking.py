@@ -76,8 +76,6 @@ for line in open(blast_file):
 	query, subject = fields[:2]
 	snp, qchrom, allele = query.split("_") # snp name, query chromosome name
 	schrom = subject
-	if query not in top_hit:
-		top_hit[query] = '_'.join([snp,subject,allele]) # the best hit for each query
 	pct_identity = 100 - (float(fields[4]) + float(fields[5])) / float(fields[3]) * 100 # to avoid big gaps
 	align_length = int(fields[3])
 	if snp not in snp_size_list:
@@ -123,6 +121,8 @@ for line in open(blast_file):
 			snpinfo[query] = query + "_" + str(pos2)
 		snp_list.append(query)
 		range_list.append("\t".join([subject, str(up) + "-" + str(down), strand]))
+		if query not in top_hit:
+			top_hit[query] = '_'.join([snp,subject,allele,str(pos2)]) # the best hit for each query
 
 # find out which has too many hits
 print("snpinfo", snpinfo)
