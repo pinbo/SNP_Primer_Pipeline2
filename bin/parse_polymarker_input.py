@@ -41,13 +41,7 @@ def main():
 		line = line.strip()
 		if not line:
 			continue
-		#snpname, chrom, seq = line.replace(" ","").split(",")
-		info = line.replace(" ","").split(",")
-		if len(info) == 3:
-			snpname, chrom, seq = info[0:]
-		elif len(info) == 2:
-			snpname, seq = info[0:]
-			chrom = "NA" # no chromosome provided
+		snpname, chrom, seq = line.replace(" ","").split(",")
 		snpname = snpname.replace("_", "-") # in case there is already "_" in the snp name
 		seq = seq.strip() # in case there is space in the input file
 		pos = seq.find("[")
