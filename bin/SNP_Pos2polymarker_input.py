@@ -21,12 +21,6 @@
 #  MA 02110-1301, USA.
 #  
 #  
-
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#  Copyright 2017 Junli Zhang <zhjl86@gmail.com>
-# 
-
 # example: 
 # SNP_Pos2polymarker_input.py <input> <output> <reference number>
 # SNP_Pos2polymarker_input.py snp_infor.txt for_polymarker.csv reference
@@ -41,16 +35,8 @@ from subprocess import call
 class SNP:
 	''' Object representing a SNP record. '''
 	def __init__(self, contig, ref_pos, ref_allele, alt_allele):
-		if contig.startswith("IWGSC_CSS"):
-			contig_info = contig.split("_") # IWGSC_CSS_7AL_scaff_4491815
-			self.chr = contig_info[2] # IWGSC_CSS_7AL_scaff_4491815
-			self.name = contig_info[1] + contig_info[2] + contig_info[4] + "-" + str(ref_pos)
-		elif contig.startswith("chr"): # pseudomolecule
-			self.chr = contig[-2:] # last two characters
-			self.name = contig + "-" + str(ref_pos)
-		else:
-			self.chr = contig # last two characters
-			self.name = contig + "-" + str(ref_pos)
+		self.chr = contig # last two characters
+		self.name = contig + "-" + str(ref_pos)
 		xstream = 50 # get 50 bps on each side
 		self.contig = contig
 		self.ref_pos = ref_pos

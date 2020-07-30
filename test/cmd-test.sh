@@ -15,3 +15,6 @@ find . -iname "temp_marker*" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcm
 
 # command to make a blastable reference
 makeblastdb -in test_reference.fa -parse_seqids -dbtype nucl
+
+# command to prepare input from SNP positions
+../bin/SNP_Pos2polymarker_input.py snp_infor.txt for_input.csv ./blastdb/test_reference.fa
