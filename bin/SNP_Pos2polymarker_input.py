@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 #  
 #  
-# example: 
+# example: input file should have NO header
 # SNP_Pos2polymarker_input.py <input> <output> <reference number>
 # SNP_Pos2polymarker_input.py snp_infor.txt for_polymarker.csv reference
 ##############################################
@@ -47,8 +47,7 @@ class SNP:
 		self.rightpos = ref_pos + xstream
 
 # function to parse the snp information file from the exon capture
-# example (no header)
-#Contig  Ref_Pos      Ref     Alternative
+# example (NO header please): Contig  Ref_Pos      Ref     Alternative
 #IWGSC_CSS_7AL_scaff_4491815     4083       T       A
 #IWGSC_CSS_7AL_scaff_4552312     3240       G       T
 #chr7A	1111400000	G	C
@@ -111,6 +110,7 @@ def get_fasta(infile, seq_name_list):
 
 # main function
 def main(argv):
+	print("\n\n!!!Input file should have NO header!!!\nEach line is a SNP!\n\n")
 	snpinfo = argv[1] # input file
 	outfile = argv[2] # output file
 	# reference_list = ["/Library/WebServer/Documents/blast/db/nucleotide/IWGSC_v2_ChrU.fa", 
