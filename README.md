@@ -16,7 +16,7 @@ I divided the pipeline into 7 steps:
 - Get CAPS primers using script "getCAPS.py"
 
 
-You can run this step by step or run the whole pipeline with script "run_getkasp.py". I suggest run the 7 steps in the script "run_getkasp.py" step by step to get familiar how it works first.
+You can run this step by step or run the whole pipeline with script "run_getkasp.py". I suggest run the 7 steps in the script "run_getkasp.py" step by step to get familiar how it works first. **You can try it first with the examples in the examples folder**. 
 
 Example: `run_getkasp.py for_polymarker.csv 200 1 1 63 25 0 /home/junli/blastdb/iwgsc_refseqv1.0.fasta`
 
