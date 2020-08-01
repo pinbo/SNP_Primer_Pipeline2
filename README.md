@@ -16,7 +16,7 @@ I divided the pipeline into 7 steps:
 - Get CAPS primers using script "getCAPS.py"
 
 
-You can run this step by step or run the whole pipeline with script "run_getkasp.py". I suggest run the 7 steps in the script "run_getkasp.py" step by step to get familiar how it works first. **You can try it first with the examples in the examples folder**. 
+You can run this step by step or run the whole pipeline with script "run_getkasp.py". I suggest run the 7 steps in the script "run_getkasp.py" step by step to get familiar how it works first. **You can try it first with the examples in the examples folder using the commands in the file cmd-test.sh**. 
 
 Example: `run_getkasp.py for_polymarker.csv 200 1 1 63 25 0 /home/junli/blastdb/iwgsc_refseqv1.0.fasta`
 
@@ -46,6 +46,7 @@ NO space is allowed. It includes Gene ID, chromosome/contig where it is located,
 5. Use the msa file to design primers using primer3
 
 # Main Changes
+- 07/31/2020: updated SNP position to polymarker input to fit BLAST+ both 2.6 and 2.9.0+.
 - 07/23/2020: Now supports guessing the best chromosome/contig location based on the blast result: if the chromosome name in the SNP input file did not have any matches in the blast result, it will use the best hit as target chromosome.
 - 07/22/2020: Update all code to run with python3 (use `2to3` to convert python2 script to python3 script)
 - 07/22/2020: Update to **SNP Primer Design Pipeline 2** for ANY species (before it was just for wheat. Now should be able to work for any species with any ploidy)
@@ -63,7 +64,7 @@ SNP_Primer_Pipeline needs following 3 software to find differences among homeolo
 1. **Python 3**: Please install python 3.x (default download will be python 3, because python 2 is not supported anymore)
 2. **Muscle**: Multiple sequence alignment program (http://www.drive5.com/muscle/)
 3. **Primer3**: program for designing PCR primers (http://primer3.sourceforge.net/)
-4. **BLAST+ 2.9.0** (or later) package from NCBI (https://blast.ncbi.nlm.nih.gov/Blast.cgi)
+4. **BLAST+** (or later) package from NCBI (https://blast.ncbi.nlm.nih.gov/Blast.cgi)
 
 "**muscle**" and "**primer3_core**" are included in the package, so "**BLAST+**" and "**Python 3**" software you need to install in your system.
 
