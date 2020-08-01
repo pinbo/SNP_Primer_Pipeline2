@@ -35,7 +35,7 @@ from subprocess import call
 class SNP:
 	''' Object representing a SNP record. '''
 	def __init__(self, contig, ref_pos, ref_allele, alt_allele):
-		self.chr = contig # last two characters
+		self.chr = contig
 		self.name = contig + "-" + str(ref_pos)
 		xstream = 50 # get 50 bps on each side
 		self.contig = contig
@@ -60,31 +60,23 @@ def parse_exon_snp(snpinfo):
 			line = line.strip()
 			if not line:
 				continue
-			contig, ref_pos, ref_allele, alt_allele = line.rstrip().split() # split with white space
-			#key = ",".join(col[0:3])
+			contig, ref_pos, ref_allele, alt_allele = line.rstrip().split() # split with white space, tab or space are all okay
 			snpdict[contig + "-" + ref_pos] = SNP(contig, int(ref_pos), ref_allele, alt_allele)
 			seq_name_list.append(contig + "-" + ref_pos)
 	return snpdict, seq_name_list
 
 # function to prepare file for blastdbcmd to get the flanking sequences of SNPs
 def prepare_seq_range(snpdict, seq_name_list, outfile): # seq_name_list to make sure the output order is the same as input order
-	# output
-	#outfile = "temp_range.txt"
-	#seq_name_list = [] # for changing the sequence names from the blastdbcmd output
 	out = open(outfile, "w")
 	for k in seq_name_list:
 		v = snpdict[k]
-	#for k, v in snpdict.items():
-		#seq_name_list.append(k)
-		contig = k.split("-")[0] # k = contig + "-" + ref_pos]
+		contig = "-".join(k.split("-")[:-1]) # k = contig + "-" + ref_pos, in case there are "-" in the chromosome/contig names
 		out.write(contig + "\t" + str(v.leftpos) + "-" + str(v.rightpos) + "\n")
 	out.close()
-	#return seq_name_list
 	return 0
 
 # function to get the flanking sequences
 def get_flanking(range_file, flanking_file, reference):
-	#reference = "/Library/WebServer/Documents/blast/db/nucleotide/IWGSC_v2_ChrU.fa"
 	cmd = "blastdbcmd -entry_batch " + range_file + " -db " + reference + " > " + flanking_file
 	print("Command to get the flanking sequences for each SNP\n", cmd)
 	call(cmd, shell=True)
@@ -99,7 +91,7 @@ def get_fasta(infile, seq_name_list):
 			if not line:
 				continue
 			if line.startswith(">"):
-				sequence_name = line.split(":")[0].lstrip(">")
+				sequence_name = line.split()[0].split(":")[0].lstrip(">") # so both blast+2.9 or earlier work
 				if sequence_name in seq_name_list[n]: # in case seq name mismatch
 					sequence_name = seq_name_list[n]
 					n += 1
@@ -110,12 +102,9 @@ def get_fasta(infile, seq_name_list):
 
 # main function
 def main(argv):
-	print("\n\n!!!Input file should have NO header!!!\nEach line is a SNP!\n\n")
+	#print("\n\n!!!Input file should have NO header!!!\nEach line is a SNP!\n\n")
 	snpinfo = argv[1] # input file
 	outfile = argv[2] # output file
-	# reference_list = ["/Library/WebServer/Documents/blast/db/nucleotide/IWGSC_v2_ChrU.fa", 
-	# "/Library/WebServer/Documents/blast/db/nucleotide/161010_Chinese_Spring_v1.0_pseudomolecules.fasta"]
-	# reference = reference_list[int(argv[3]) - 1] # 1 or 2 for reference
 	reference = argv[3]
 	snpdict, seq_name_list = parse_exon_snp(snpinfo)
 	print("length of snpdict ", len(snpdict))
