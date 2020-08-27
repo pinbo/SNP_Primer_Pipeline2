@@ -45,7 +45,7 @@ def main(args):
 	
 	script_path = os.path.dirname(os.path.realpath(__file__)) + "/bin/" # scripts folder
 
-	
+
 	# step 1:
 	cmd1 = script_path + "parse_polymarker_input.py " + polymarker_input
 	print("Step 1: Parse polymarker input command:\n", cmd1)
@@ -65,7 +65,13 @@ def main(args):
 	# gawk '{ print $2,$3,$4 > "temp_marker_"$1".txt" }' temp_range.txt
 	cmd4 = "gawk  '{ print $2,$3,$4 > \"temp_marker_\"$1\".txt\" }' temp_range.txt"
 	print("Step 4: Flanking range for each marker command:\n", cmd4)
-	call(cmd4, shell=True)
+	filesize = os.path.getsize("temp_range.txt")
+	if filesize == 0: # no good SNPs
+		cmd0 = 'echo All the SNPs are bad, possibly too many hits. Please check the stdout. | tee Potential_CAPS_primers.tsv Potential_KASP_primers.tsv > All_alignment_raw.fa'
+		call(cmd0, shell=True)
+		sys.exit()
+	else:
+		call(cmd4, shell=True)
 	
 	# step 5: get flanking sequences for each file
 	# find . -iname "temp_marker*" | xargs -n1 basename | xargs -I {} sh -c 'blastdbcmd -entry_batch {} -db  reference  > flanking_{}.fa'
