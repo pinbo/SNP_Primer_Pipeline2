@@ -27,7 +27,8 @@
 
 # change the input wildcard and the paths of primer3 and muscle accordingly.
 # NOTES: the output primer pair includes the common primer and the primer with SNP A or T, you need to change the 3' nucleartide to get the primer for the other SNP.
-# 
+# changes
+# 2022-09-15: add a simple score for auto-selection and only use positions that can diff all homeologs (variations instead of variations2)
 
 # Usage: getkasp3.py maximum_primer_Tm maximum_primer_size whether_to_pick_anyway (1 is yes, 0 is NO)
 # example:  ../bin/getkasp3.py 63 25  0
@@ -100,6 +101,7 @@ class PrimerPair(object):
 		self.compl_end = "NA"
 		self.penalty = "NA"
 		self.product_size = 0
+		self.score = 0 # a simple score for auto-selection
 
 # simple Tm calculator
 def Tm(seq):
@@ -565,7 +567,7 @@ def kasp(seqfile):
 		if alt_allele in "ATat":
 			seq_template = seq_template[:snp_site] +  alt_allele + seq_template[snp_site + 1:]
 
-		for i in variation2:
+		for i in variation: # use variation2 if you want semi-specific primers.
 			if i == snp_site:
 				continue
 			elif i < snp_site:
@@ -599,6 +601,7 @@ def kasp(seqfile):
 		nL = 0 # left primer count
 		nR = 0 # right primer count
 		for i, pp in primerpairs.items():
+			dif3all = 0 # whether common primer can diff all in the 3' end
 			varsite = int(i.split("-")[-2]) - 1 # variation site
 			#print "varsite", varsite
 			if pp.product_size != 0:
@@ -608,6 +611,7 @@ def kasp(seqfile):
 				if varsite in variation:
 					pl.difthreeall = "YES"
 					pr.difthreeall = "YES"
+					dif3all = 1
 				if varsite < snp_site:
 					pc = pl # pc is the common primer
 					# print "pc = pl"
@@ -621,6 +625,10 @@ def kasp(seqfile):
 				# print "len(seq_template) ", len(seq_template)
 				# print "pc.end ", pc.end
 				# print "rr ", rr
+
+				# calculate a simple score for selection: only consider product size, 3'diff all, and Tm diff, diff number
+				pp.score = dif3all*5.0 + 150.0/pp.product_size + pc.difnum/10.0 - abs(pl.tm - pr.tm)/10.0
+
 				# sum of all the variation in each site
 				aa = [sum(x) for x in zip(*(diffarray[k] for k in rr))]
 				#print "aa ", aa
@@ -631,7 +639,7 @@ def kasp(seqfile):
 	#################################################	
 	# write to file
 	outfile = open(out, 'w')
-	outfile.write("index\tproduct_size\ttype\tstart\tend\tvariation number\t3'diffall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\n")			
+	outfile.write("index\tproduct_size\ttype\tstart\tend\tvariation number\t3'diffall\tlength\tTm\tGCcontent\tany\t3'\tend_stability\thairpin\tprimer_seq\tReverseComplement\tpenalty\tcompl_any\tcompl_end\tscore\n")			
 	# write output file
 	for i, pp in final_primers.items():
 		pl = format_primer_seq(pp.left, variation)
@@ -654,9 +662,9 @@ def kasp(seqfile):
 			pA.seq = pA.seq[:-1] + ReverseComplement(SNP_A)
 			pB.seq = pB.seq[:-1] + ReverseComplement(SNP_B)
 			pC = pl
-		outfile.write("\t".join([i + "-Allele-" + SNP_A, str(pp.product_size), pA.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pA.name]) + "\n")
-		outfile.write("\t".join([i + "-Allele-" + SNP_B, str(pp.product_size), pB.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pB.name]) + "\n")
-		outfile.write("\t".join([i + "-Common", str(pp.product_size),   pC.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, pC.name]) + "\n")
+		outfile.write("\t".join([i + "-Allele-" + SNP_A, str(pp.product_size), pA.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, str(pp.score)]) + "\n")
+		outfile.write("\t".join([i + "-Allele-" + SNP_B, str(pp.product_size), pB.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, str(pp.score)]) + "\n")
+		outfile.write("\t".join([i + "-Common", str(pp.product_size),   pC.formatprimer(), pp.penalty, pp.compl_any, pp.compl_end, str(pp.score)]) + "\n")
 
 	outfile.write("\n\nSites that can differ all for " + snpname + "\n")
 	outfile.write(", ".join([str(x + 1) for x in variation])) # change to 1 based
