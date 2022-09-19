@@ -46,6 +46,7 @@ NO space is allowed. It includes Gene ID, chromosome/contig where it is located,
 5. Use the msa file to design primers using primer3
 
 # Main Changes
+- 09/15/2022: add a score (bigger is better) for easy auto selection and only use sites that can differ all homeologs (3'diffall) to design common primers.
 - 07/31/2020: updated SNP position to polymarker input to fit BLAST+ both 2.6 and 2.9.0+.
 - 07/23/2020: Now supports guessing the best chromosome/contig location based on the blast result: if the chromosome name in the SNP input file did not have any matches in the blast result, it will use the best hit as target chromosome.
 - 07/22/2020: Update all code to run with python3 (use `2to3` to convert python2 script to python3 script)
